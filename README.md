@@ -1,3 +1,68 @@
+# VidaSalud Frontend
+
+Frontend de VidaSalud construido con Angular 18. Permite iniciar sesión mediante Microsoft Entra ID, consultar las atenciones y consumir el backend a través de AWS API Gateway.
+
+## Tecnologías
+
+- Angular 18 y TypeScript.
+- Angular Router para la navegación.
+- MSAL Angular y MSAL Browser para OAuth 2.0 / OpenID Connect.
+- RxJS y `HttpClient` para consumir los servicios protegidos.
+
+## Funcionalidades
+
+- Inicio y cierre de sesión con una cuenta Microsoft.
+- Protección de la vista de atenciones mediante `MsalGuard`.
+- Obtención silenciosa de tokens con `MsalService`.
+- Envío del token Bearer mediante `MsalInterceptor`.
+- Visualización del usuario, roles y atenciones registradas.
+
+## Requisitos
+
+- Node.js y npm.
+- Una aplicación registrada en Microsoft Entra ID.
+- El backend y API Gateway disponibles.
+
+## Instalación y ejecución local
+
+```bash
+npm install
+npm start -- --host 0.0.0.0 --port 4201
+```
+
+Luego abre `http://localhost:4201`.
+
+El puerto configurado como URI de redirección debe coincidir con el puerto utilizado por el navegador. La configuración de MSAL se encuentra en `src/app/app.config.ts`.
+
+## Compilación y pruebas
+
+```bash
+npm run build
+npm test
+```
+
+La compilación genera los archivos en `dist/`.
+
+## Estructura principal
+
+```text
+src/app/
+	api.service.ts              Servicio de llamadas autenticadas
+	app.config.ts               Configuración de MSAL y HTTP
+	app.routes.ts               Rutas y protección de vistas
+	appointments/               Vista de atenciones
+	home/                       Vista principal
+```
+
+## API utilizada
+
+La URL del backend se configura en `src/app/api.service.ts`. En el entorno desplegado apunta a API Gateway y expone, entre otros, estos recursos:
+
+- `GET /api/me`
+- `GET /api/appointments`
+- `GET /api/catalog/services`
+
+No se deben publicar secretos, contraseñas ni tokens en este repositorio.
 # VidasaludFrontendTemp
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
