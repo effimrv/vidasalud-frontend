@@ -21,6 +21,9 @@ a { color: inherit; text-decoration: none; }
 .nav-links { display: flex; gap: 28px; height: 76px; align-items: center; color: #b8cbd0; font-size: 14px; }
 .nav-links a { height: 100%; display: grid; place-items: center; border-bottom: 3px solid transparent; }
 .nav-links a.active, .nav-links a:hover { color: #fff; border-bottom-color: #7ed3c7; }
+.nav-home { grid-auto-flow: column; gap: 8px; height: 40px !important; align-self: center; padding: 0 15px; border: 1px solid rgba(157, 224, 213, .3) !important; border-radius: 8px; background: rgba(255, 255, 255, .06); font-weight: 700; }
+.nav-home span { color: #9de0d5; font-size: 22px; line-height: 1; }
+.nav-home.active, .nav-home:hover { background: rgba(157, 224, 213, .16); border-color: #7ed3c7 !important; }
 .account-area { display: flex; align-items: center; gap: 16px; margin-left: auto; font-size: 13px; }
 .welcome { color: #b8cbd0; }
 .button { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 8px; padding: 11px 17px; cursor: pointer; font-weight: 700; transition: transform .2s ease, background .2s ease; }
@@ -28,6 +31,11 @@ a { color: inherit; text-decoration: none; }
 .button-light { color: var(--navy); background: #d9f0eb; }
 .button-quiet { padding: 8px 12px; color: #d9e8e8; background: #23495a; font-size: 12px; }
 .button-primary { margin-top: 16px; color: #fff; background: var(--coral); }
+.button-login { margin-top: 16px; color: var(--navy); background: #fff; box-shadow: 0 10px 22px rgba(10, 38, 52, .18); }
+.button-login:hover { background: #f2fbfa; }
+.button-arrow { margin-left: 4px; color: var(--teal); }
+.microsoft-icon { display: grid; grid-template-columns: repeat(2, 7px); grid-template-rows: repeat(2, 7px); gap: 2px; }
+.microsoft-icon i:nth-child(1) { background: #f35325; }.microsoft-icon i:nth-child(2) { background: #81bc06; }.microsoft-icon i:nth-child(3) { background: #05a6f0; }.microsoft-icon i:nth-child(4) { background: #ffba08; }
 .page-shell { width: min(1120px, 88vw); margin: 0 auto; padding: 54px 0 80px; }
 .eyebrow { color: var(--teal); font-size: 11px; font-weight: 700; letter-spacing: 1.8px; }
 .hero-panel { min-height: 420px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; padding: 65px 8%; color: #fff; background: #17485b; border-radius: 20px; }

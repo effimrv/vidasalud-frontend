@@ -14,7 +14,7 @@ import { MsalService } from '@azure/msal-angular';
         <h1>Una vista clara para cuidar mejor.</h1>
         <p>Centraliza las atenciones de tu centro de salud y mantén cada solicitud en movimiento.</p>
         <a *ngIf="logueada; else iniciarSesion" class="button button-primary" routerLink="/appointments">Ver atenciones <span aria-hidden="true">&#8594;</span></a>
-        <ng-template #iniciarSesion><button class="button button-primary" (click)="login()">Iniciar sesión <span aria-hidden="true">&#8594;</span></button></ng-template>
+        <ng-template #iniciarSesion><button class="button button-login" (click)="login()"><span class="microsoft-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Ingresar con Microsoft</span><span class="button-arrow" aria-hidden="true">&#8594;</span></button></ng-template>
       </div>
       <div class="hero-orbit" aria-hidden="true">
         <div class="orbit-ring ring-one"></div>

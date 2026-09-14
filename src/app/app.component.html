@@ -4,7 +4,7 @@
     <span>VidaSalud</span>
   </a>
   <div class="nav-links">
-    <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+    <a class="nav-home" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><span aria-hidden="true">⌂</span> Inicio</a>
     <a *ngIf="logueada" routerLink="appointments" routerLinkActive="active">Atenciones</a>
   </div>
   <span class="account-area">
