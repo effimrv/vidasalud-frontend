@@ -1,18 +1,23 @@
-<nav style="display:flex; gap:16px; padding:12px; background:#0d6efd; color:#fff; align-items:center;">
-  <strong>VidaSalud</strong>
-  <a routerLink="" style="color:#fff;">Inicio</a>
-  <a routerLink="appointments" style="color:#fff;">Atenciones</a>
-  <span style="margin-left:auto;">
+<nav class="topbar">
+  <a class="brand" routerLink="">
+    <span class="brand-mark">V</span>
+    <span>VidaSalud</span>
+  </a>
+  <div class="nav-links">
+    <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+    <a routerLink="appointments" routerLinkActive="active">Atenciones</a>
+  </div>
+  <span class="account-area">
     <ng-container *ngIf="logueada; else noLog">
-      Hola, {{ nombre }}
-      <button (click)="logout()">Cerrar sesion</button>
+      <span class="welcome">Hola, <strong>{{ nombre }}</strong></span>
+      <button class="button button-quiet" (click)="logout()">Cerrar sesion</button>
     </ng-container>
     <ng-template #noLog>
-      <button (click)="login()">Iniciar sesion con Microsoft</button>
+      <button class="button button-light" (click)="login()">Iniciar sesion con Microsoft</button>
     </ng-template>
   </span>
 </nav>
 
-<main style="padding:24px;">
+<main class="page-shell">
   <router-outlet></router-outlet>
 </main>
