@@ -17,22 +17,16 @@ Frontend de VidaSalud construido con Angular 18. Permite iniciar sesión mediant
 - Envío del token Bearer mediante `MsalInterceptor`.
 - Visualización del usuario, roles y atenciones registradas.
 
-## Requisitos
-
-- Node.js y npm.
-- Una aplicación registrada en Microsoft Entra ID.
-- El backend y API Gateway disponibles.
-
 ## Instalación y ejecución local
+
+Requisitos: Node.js, npm, una aplicación registrada en Microsoft Entra ID y el backend disponible.
 
 ```bash
 npm install
 npm start -- --host 0.0.0.0 --port 4201
 ```
 
-Luego abre `http://localhost:4201`.
-
-El puerto configurado como URI de redirección debe coincidir con el puerto utilizado por el navegador. La configuración de MSAL se encuentra en `src/app/app.config.ts`.
+Luego abre `http://localhost:4201`. La URI de redirección de MSAL debe coincidir con el puerto utilizado. La configuración está en `src/app/app.config.ts`.
 
 ## Compilación y pruebas
 
@@ -47,46 +41,15 @@ La compilación genera los archivos en `dist/`.
 
 ```text
 src/app/
-	api.service.ts              Servicio de llamadas autenticadas
-	app.config.ts               Configuración de MSAL y HTTP
-	app.routes.ts               Rutas y protección de vistas
-	appointments/               Vista de atenciones
-	home/                       Vista principal
+  api.service.ts       Servicio de llamadas autenticadas
+  app.config.ts        Configuración de MSAL y HTTP
+  app.routes.ts        Rutas y protección de vistas
+  appointments/        Vista de atenciones
+  home/                Vista principal
 ```
 
 ## API utilizada
 
-La URL del backend se configura en `src/app/api.service.ts`. En el entorno desplegado apunta a API Gateway y expone, entre otros, estos recursos:
-
-- `GET /api/me`
-- `GET /api/appointments`
-- `GET /api/catalog/services`
+La URL del backend se configura en `src/app/api.service.ts` y utiliza `GET /api/me`, `GET /api/appointments` y `GET /api/catalog/services`.
 
 No se deben publicar secretos, contraseñas ni tokens en este repositorio.
-# VidasaludFrontendTemp
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
-
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
