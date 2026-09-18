@@ -136,6 +136,37 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
           <strong>{{ atencionesCanceladas }}</strong>
         </article>
       </section>
+
+      <div class="charts-grid">
+        <section class="chart-panel">
+          <h3>Citas por Especialidad</h3>
+          <div class="chart-bars" *ngIf="citasPorEspecialidad.length > 0; else sinCitasEspecialidad">
+            <div class="chart-row" *ngFor="let item of citasPorEspecialidad">
+              <span class="chart-label">{{ item.nombre }}</span>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill chart-bar-especialidad" [style.width.%]="item.porcentaje"></div>
+              </div>
+              <span class="chart-value">{{ item.cantidad }}</span>
+            </div>
+          </div>
+          <ng-template #sinCitasEspecialidad>
+            <p class="empty-chart">Aún no hay citas registradas.</p>
+          </ng-template>
+        </section>
+
+        <section class="chart-panel">
+          <h3>Citas por Estado</h3>
+          <div class="chart-bars">
+            <div class="chart-row" *ngFor="let item of citasPorEstado">
+              <span class="chart-label">{{ item.etiqueta }}</span>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill" [ngClass]="'chart-bar-' + item.estado.toLowerCase()" [style.width.%]="item.porcentaje"></div>
+              </div>
+              <span class="chart-value">{{ item.cantidad }}</span>
+            </div>
+          </div>
+        </section>
+      </div>
     </ng-container>
 
     <!-- ================= TAB 3: Supervisión de Atenciones ================= -->
@@ -432,6 +463,44 @@ export class AdminPanelComponent implements OnInit {
 
   get atencionesCanceladas(): number {
     return this.atenciones.filter(a => a.estado === 'CANCELADA').length;
+  }
+
+  get citasPorEspecialidad(): { nombre: string; cantidad: number; porcentaje: number }[] {
+    if (this.atenciones.length === 0) return [];
+
+    const conteoPorServicio = new Map<number, number>();
+    for (const a of this.atenciones) {
+      conteoPorServicio.set(a.servicioId, (conteoPorServicio.get(a.servicioId) || 0) + 1);
+    }
+
+    const maxConteo = Math.max(...conteoPorServicio.values());
+    return Array.from(conteoPorServicio.entries())
+      .map(([servicioId, cantidad]) => ({
+        nombre: this.getServicioNombre(servicioId),
+        cantidad,
+        porcentaje: Math.round((cantidad / maxConteo) * 100)
+      }))
+      .sort((a, b) => b.cantidad - a.cantidad);
+  }
+
+  get citasPorEstado(): { estado: string; etiqueta: string; cantidad: number; porcentaje: number }[] {
+    const estados: { estado: string; etiqueta: string }[] = [
+      { estado: 'SOLICITADA', etiqueta: 'Solicitadas' },
+      { estado: 'CONFIRMADA', etiqueta: 'Confirmadas' },
+      { estado: 'EN_ESPERA', etiqueta: 'En Espera' },
+      { estado: 'EN_ATENCION', etiqueta: 'En Consulta' },
+      { estado: 'CERRADA', etiqueta: 'Cerradas' },
+      { estado: 'CANCELADA', etiqueta: 'Canceladas' }
+    ];
+
+    const conteos = estados.map(e => this.countPorEstado(e.estado));
+    const maxConteo = Math.max(...conteos, 1);
+
+    return estados.map((e, i) => ({
+      ...e,
+      cantidad: conteos[i],
+      porcentaje: Math.round((conteos[i] / maxConteo) * 100)
+    }));
   }
 
   // ===== Supervisión de Atenciones =====

@@ -38,7 +38,7 @@
       <a class="button button-cta-nav" *ngIf="!esAdmin" routerLink="appointments">
         <span aria-hidden="true">📅</span> Mis Atenciones
       </a>
-      <button class="button button-nav-quiet" (click)="logout()">Cerrar sesión</button>
+      <button class="button button-nav-quiet" (click)="pedirConfirmacionLogout()">Cerrar sesión</button>
     </ng-container>
     <ng-template #noLog>
       <button class="button button-cta-nav" (click)="login()">
@@ -87,3 +87,17 @@
 <main class="page-shell">
   <router-outlet></router-outlet>
 </main>
+
+<div class="modal-overlay" *ngIf="mostrarConfirmacionLogout" (click)="cancelarLogout()">
+  <div class="modal-card modal-card-sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>¿Cerrar sesión?</h3>
+      <button type="button" class="alert-close" (click)="cancelarLogout()">&times;</button>
+    </div>
+    <p class="modal-text">Tendrás que volver a iniciar sesión con tu cuenta de Microsoft para acceder a tu portal.</p>
+    <div class="form-actions">
+      <button type="button" class="button-quiet" (click)="cancelarLogout()">Cancelar</button>
+      <button type="button" class="button button-primary btn-header-action" (click)="confirmarLogout()">Sí, cerrar sesión</button>
+    </div>
+  </div>
+</div>

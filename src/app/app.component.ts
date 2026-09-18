@@ -16,6 +16,7 @@ export class AppComponent implements OnInit {
   especialidades = ESPECIALIDADES;
   menuAbierto: string | null = null;
   modoOscuro = false;
+  mostrarConfirmacionLogout = false;
 
   constructor(private msal: MsalService, private router: Router) {}
 
@@ -67,7 +68,16 @@ export class AppComponent implements OnInit {
     this.msal.loginRedirect();
   }
 
-  logout(): void {
+  pedirConfirmacionLogout(): void {
+    this.mostrarConfirmacionLogout = true;
+  }
+
+  cancelarLogout(): void {
+    this.mostrarConfirmacionLogout = false;
+  }
+
+  confirmarLogout(): void {
+    this.mostrarConfirmacionLogout = false;
     this.msal.logoutRedirect();
   }
 
