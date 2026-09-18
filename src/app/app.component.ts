@@ -23,6 +23,9 @@ export class AppComponent implements OnInit {
     this.msal.instance.handleRedirectPromise().then(result => {
       if (result?.account) {
         this.msal.instance.setActiveAccount(result.account);
+        // Venimos de un login recién completado: llevamos al usuario directo a su portal,
+        // en vez de dejarlo en la página principal de marketing.
+        this.router.navigateByUrl('/appointments');
       } else {
         const cuentas = this.msal.instance.getAllAccounts();
         if (cuentas.length > 0) this.msal.instance.setActiveAccount(cuentas[0]);
