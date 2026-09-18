@@ -32,7 +32,7 @@
       <span class="welcome">
         Hola, <strong>{{ nombre }}</strong>
         <span class="role-badge-top" [ngClass]="esAdmin ? 'badge-top-admin' : 'badge-top-paciente'">
-          {{ esAdmin ? 'Admin' : 'Paciente' }}
+          {{ etiquetaRol }}
         </span>
       </span>
       <a class="button button-cta-nav" routerLink="appointments">
@@ -48,7 +48,7 @@
   </span>
 </nav>
 
-<nav class="mega-nav" #megaNav>
+<nav class="mega-nav" #megaNav *ngIf="!esAdmin">
   <div class="mega-nav-inner">
     <div class="mega-item" [class.open]="menuAbierto === 'especialidades'">
       <button type="button" class="mega-trigger" (click)="toggleMenu('especialidades')">

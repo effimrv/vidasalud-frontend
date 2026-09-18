@@ -57,6 +57,12 @@ export class AppComponent implements OnInit {
     return this.roles.some(r => r === 'Admin' || r === 'Recepcionista');
   }
 
+  get etiquetaRol(): string {
+    if (this.roles.includes('Admin')) return 'Admin';
+    if (this.roles.includes('Recepcionista')) return 'Recepcionista';
+    return 'Paciente';
+  }
+
   login(): void {
     this.msal.loginRedirect();
   }
