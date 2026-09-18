@@ -1,7 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MsalService } from '@azure/msal-angular';
-import { from, Observable, switchMap } from 'rxjs';
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
+import { from, Observable, of, switchMap, catchError, throwError } from 'rxjs';
+
+export interface UserProfile {
+  nombre: string;
+  usuario: string;
+  roles: string[];
+}
+
+export interface Appointment {
+  id: number;
+  pacienteNombre: string;
+  servicioId: number;
+  boxId?: number;
+  estado: 'SOLICITADA' | 'CONFIRMADA' | 'EN_ESPERA' | 'EN_ATENCION' | 'CERRADA' | 'CANCELADA';
+  creadaEn?: string;
+}
+
+export interface ClinicalService {
+  id: number;
+  nombre: string;
+  precio: number;
+  boxId?: number;
+  cuposDisponibles: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -10,28 +34,57 @@ export class ApiService {
 
   constructor(private http: HttpClient, private msal: MsalService) {}
 
-  private conToken<T>(url: string): Observable<T> {
+  private getHeaders(): Observable<HttpHeaders> {
     const cuenta = this.msal.instance.getActiveAccount()
       ?? this.msal.instance.getAllAccounts()[0];
+
+    if (!cuenta) {
+      return throwError(() => new Error('No hay sesión de usuario activa'));
+    }
+
     return from(
       this.msal.instance.acquireTokenSilent({ scopes: [this.scope], account: cuenta })
     ).pipe(
-      switchMap(result => {
-        const headers = new HttpHeaders({ Authorization: 'Bearer ' + result.accessToken });
-        return this.http.get<T>(url, { headers });
-      })
+      catchError(err => {
+        if (err instanceof InteractionRequiredAuthError) {
+          this.msal.loginRedirect();
+        }
+        return throwError(() => err);
+      }),
+      switchMap(result => of(new HttpHeaders({
+        Authorization: 'Bearer ' + result.accessToken,
+        'Content-Type': 'application/json'
+      })))
     );
   }
 
-  getAppointments(): Observable<any> {
-    return this.conToken(this.base + '/api/appointments');
+  getAppointments(): Observable<Appointment[]> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.get<Appointment[]>(`${this.base}/api/appointments`, { headers }))
+    );
   }
 
-  getCatalog(): Observable<any> {
-    return this.conToken(this.base + '/api/catalog/services');
+  createAppointment(cita: { pacienteNombre: string; servicioId: number; boxId?: number }): Observable<Appointment> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.post<Appointment>(`${this.base}/api/appointments`, cita, { headers }))
+    );
   }
 
-  getMe(): Observable<any> {
-    return this.conToken(this.base + '/api/me');
+  updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.put<Appointment>(`${this.base}/api/appointments/${id}/status`, { status }, { headers }))
+    );
+  }
+
+  getCatalog(): Observable<ClinicalService[]> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.get<ClinicalService[]>(`${this.base}/api/catalog/services`, { headers }))
+    );
+  }
+
+  getMe(): Observable<UserProfile> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.get<UserProfile>(`${this.base}/api/me`, { headers }))
+    );
   }
 }

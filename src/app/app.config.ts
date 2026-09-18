@@ -38,9 +38,8 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
 
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   const protectedResourceMap = new Map<string, Array<string>>();
-  protectedResourceMap.set('http://localhost:8080/api/appointments', [apiScope]);
-  protectedResourceMap.set('http://localhost:8080/api/me', [apiScope]);
-  protectedResourceMap.set('http://localhost:8080/api/catalog/services', [apiScope]);
+  protectedResourceMap.set(`${bffUrl}/api/*`, [apiScope]);
+  protectedResourceMap.set('http://localhost:8080/api/*', [apiScope]);
   return {
     interactionType: InteractionType.Redirect,
     protectedResourceMap

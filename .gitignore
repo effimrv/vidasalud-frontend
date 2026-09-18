@@ -3,3 +3,5 @@ dist/
 .angular/
 .vscode/
 .DS_Store
+.npm/
+.angular-config.json

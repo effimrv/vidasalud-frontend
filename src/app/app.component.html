@@ -4,16 +4,28 @@
     <span>VidaSalud</span>
   </a>
   <div class="nav-links">
-    <a class="nav-home" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><span aria-hidden="true">⌂</span> Inicio</a>
-    <a *ngIf="logueada" routerLink="appointments" routerLinkActive="active">Atenciones</a>
+    <a class="nav-home" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <span aria-hidden="true">⌂</span> Inicio
+    </a>
+    <a *ngIf="logueada" routerLink="appointments" routerLinkActive="active">
+      {{ esAdmin ? 'Panel Operativo' : 'Mis Atenciones' }}
+    </a>
   </div>
   <span class="account-area">
     <ng-container *ngIf="logueada; else noLog">
-      <span class="welcome">Hola, <strong>{{ nombre }}</strong></span>
-      <button class="button button-quiet" (click)="logout()">Cerrar sesion</button>
+      <span class="welcome">
+        Hola, <strong>{{ nombre }}</strong>
+        <span class="role-badge-top" [ngClass]="esAdmin ? 'badge-top-admin' : 'badge-top-paciente'">
+          {{ esAdmin ? 'Admin' : 'Paciente' }}
+        </span>
+      </span>
+      <button class="button button-quiet" (click)="logout()">Cerrar sesión</button>
     </ng-container>
     <ng-template #noLog>
-      <button class="button button-light" (click)="login()">Iniciar sesion con Microsoft</button>
+      <button class="button button-nav-login" (click)="login()">
+        <span class="lock-icon" aria-hidden="true">🔒</span>
+        <span>Acceso Portal</span>
+      </button>
     </ng-template>
   </span>
 </nav>

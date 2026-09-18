@@ -32,6 +32,18 @@ export class AppComponent implements OnInit {
     return cuenta ? (cuenta.name ?? cuenta.username) : '';
   }
 
+  get roles(): string[] {
+    const cuenta = this.msal.instance.getActiveAccount();
+    if (cuenta?.idTokenClaims && 'roles' in cuenta.idTokenClaims) {
+      return (cuenta.idTokenClaims as any).roles || [];
+    }
+    return [];
+  }
+
+  get esAdmin(): boolean {
+    return this.roles.some(r => r === 'Admin' || r === 'Recepcionista');
+  }
+
   login(): void {
     this.msal.loginRedirect();
   }
