@@ -243,6 +243,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
     <!-- 2. VISTA DE ADMINISTRADOR / RECEPCIONISTA (PANEL OPERATIVO)               -->
     <!-- ========================================================================= -->
     <ng-container *ngIf="modoActivo === 'admin'">
+      <div class="admin-console">
       <section class="dashboard-hero dashboard-hero-admin">
         <div class="page-heading">
           <div>
@@ -474,6 +475,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
           </div>
         </ng-template>
       </section>
+      </div>
     </ng-container>
   `
 })

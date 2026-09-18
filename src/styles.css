@@ -380,6 +380,40 @@ tr:last-child td { border-bottom: 0; }
 .btn-action-cancel { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; border-radius: 6px; padding: 5px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
 .btn-action-cancel:hover { background: #fca5a5; }
 
+/* ============================================================= */
+/* Panel Operativo (Admin): identidad visual distinta del portal del paciente, misma paleta */
+/* ============================================================= */
+.admin-console .stat-card {
+	background: linear-gradient(155deg, #17485b 0%, #123447 100%);
+	border-color: #123447;
+	border-radius: 8px;
+	border-left: 3px solid var(--teal);
+	box-shadow: 0 8px 20px rgba(13, 39, 51, .16);
+}
+.admin-console .stat-card span { color: #9fc3c7; text-transform: uppercase; letter-spacing: .7px; }
+.admin-console .stat-card strong { color: #fff; }
+.admin-console .stat-card-warning { border-left-color: #f59e0b; }
+.admin-console .stat-card-accent { background: linear-gradient(155deg, #0d2733 0%, #081a22 100%); border-color: #081a22; border-left-color: var(--coral); }
+.admin-console .stat-card-accent span { color: #7ed3c7; }
+
+.admin-console .table-panel { border-radius: 8px; }
+
+.admin-console .panel-header { position: relative; padding-top: 25px; }
+.admin-console .panel-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--teal) 60%, var(--coral) 100%); }
+.admin-console .panel-header h2 { text-transform: uppercase; font-size: 15px; letter-spacing: .8px; }
+
+.admin-console table th { background: #123447; color: #b9d3d6; }
+.admin-console th, .admin-console td { padding: 13px 24px; }
+.admin-console tbody tr:hover { background: var(--surface-alt); }
+.admin-console .id-cell { color: var(--coral); font-family: 'Space Grotesk', monospace; }
+
+.admin-console .status-tabs { background: #123447; padding: 10px 26px; }
+.admin-console .tab-btn { color: #9fc3c7; }
+.admin-console .tab-btn:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+.admin-console .tab-active { background: var(--teal) !important; }
+
+.admin-console .search-input { background: var(--surface-alt); }
+
 /* Catálogo de Servicios (Appointments) */
 .catalog-section { margin-top: 36px; }
 .section-heading h2 { margin: 0 0 4px; font: 700 24px 'Space Grotesk'; }
