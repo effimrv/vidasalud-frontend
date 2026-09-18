@@ -1,16 +1,32 @@
+<div class="utility-bar">
+  <div class="utility-bar-inner">
+    <span class="utility-tag">Red de Salud Integral · Atención presencial y digital</span>
+    <div class="utility-actions">
+      <button
+        type="button"
+        class="theme-toggle"
+        [class.active]="modoOscuro"
+        [attr.aria-pressed]="modoOscuro"
+        (click)="toggleModoOscuro()"
+      >
+        <span aria-hidden="true">{{ modoOscuro ? '☀️' : '🌙' }}</span>
+        {{ modoOscuro ? 'Modo claro' : 'Modo oscuro' }}
+      </button>
+    </div>
+  </div>
+</div>
+
 <nav class="topbar">
-  <a class="brand" routerLink="">
+  <a class="brand" routerLink="/">
     <img src="logo.png" alt="Logo VidaSalud" class="brand-img" />
     <span>VidaSalud</span>
   </a>
-  <div class="nav-links">
-    <a class="nav-home" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-      <span aria-hidden="true">⌂</span> Inicio
-    </a>
-    <a *ngIf="logueada" routerLink="appointments" routerLinkActive="active">
-      {{ esAdmin ? 'Panel Operativo' : 'Mis Atenciones' }}
-    </a>
-  </div>
+
+  <form class="nav-search" (submit)="buscar($event)">
+    <span class="search-icon" aria-hidden="true">🔍</span>
+    <input type="search" name="busqueda" placeholder="¿Qué estás buscando? Ej: Pediatría, Cardiología..." />
+  </form>
+
   <span class="account-area">
     <ng-container *ngIf="logueada; else noLog">
       <span class="welcome">
@@ -19,15 +35,77 @@
           {{ esAdmin ? 'Admin' : 'Paciente' }}
         </span>
       </span>
+      <a class="button button-cta-nav" routerLink="appointments">
+        <span aria-hidden="true">📅</span> {{ esAdmin ? 'Panel Operativo' : 'Mis Atenciones' }}
+      </a>
       <button class="button button-quiet" (click)="logout()">Cerrar sesión</button>
     </ng-container>
     <ng-template #noLog>
-      <button class="button button-nav-login" (click)="login()">
-        <span class="lock-icon" aria-hidden="true">🔒</span>
-        <span>Acceso Portal</span>
+      <button class="button button-cta-nav" (click)="login()">
+        <span aria-hidden="true">📅</span> Reservar hora
       </button>
     </ng-template>
   </span>
+</nav>
+
+<nav class="mega-nav" #megaNav>
+  <div class="mega-nav-inner">
+    <div class="mega-item" [class.open]="menuAbierto === 'servicios'">
+      <button type="button" class="mega-trigger" (click)="toggleMenu('servicios')">
+        Servicios en línea <span class="chev" aria-hidden="true">⌄</span>
+      </button>
+      <div class="mega-panel" *ngIf="menuAbierto === 'servicios'">
+        <a class="mega-link" routerLink="appointments" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">📅</span>
+          <span class="mega-link-text"><strong>Agendar hora</strong><small>Reserva tu próxima consulta</small></span>
+        </a>
+        <a class="mega-link" routerLink="appointments" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">🗂️</span>
+          <span class="mega-link-text"><strong>Mis atenciones</strong><small>Revisa el estado de tus citas</small></span>
+        </a>
+        <a class="mega-link" routerLink="appointments" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">✖️</span>
+          <span class="mega-link-text"><strong>Anular una hora</strong><small>Cancela una reserva vigente</small></span>
+        </a>
+        <a class="mega-link" routerLink="/" fragment="especialidades" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">📋</span>
+          <span class="mega-link-text"><strong>Catálogo de especialidades</strong><small>Conoce valores y boxes disponibles</small></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mega-item" [class.open]="menuAbierto === 'especialidades'">
+      <button type="button" class="mega-trigger" (click)="toggleMenu('especialidades')">
+        Especialidades y servicios <span class="chev" aria-hidden="true">⌄</span>
+      </button>
+      <div class="mega-panel" *ngIf="menuAbierto === 'especialidades'">
+        <a class="mega-link" *ngFor="let esp of especialidades" routerLink="/" [fragment]="esp.slug" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">{{ esp.icono }}</span>
+          <span class="mega-link-text"><strong>{{ esp.nombre }}</strong><small>{{ esp.box }} · {{ esp.precio }}</small></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mega-item" [class.open]="menuAbierto === 'nosotros'">
+      <button type="button" class="mega-trigger" (click)="toggleMenu('nosotros')">
+        Nosotros <span class="chev" aria-hidden="true">⌄</span>
+      </button>
+      <div class="mega-panel" *ngIf="menuAbierto === 'nosotros'">
+        <a class="mega-link" routerLink="/" fragment="horario" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">🕒</span>
+          <span class="mega-link-text"><strong>Horario de atención</strong><small>Días y horas disponibles</small></span>
+        </a>
+        <a class="mega-link" routerLink="/" fragment="seguridad" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">🔐</span>
+          <span class="mega-link-text"><strong>Seguridad y datos</strong><small>Cómo protegemos tu información</small></span>
+        </a>
+        <a class="mega-link" routerLink="/" fragment="contacto" (click)="cerrarMenu()">
+          <span class="mega-link-icon" aria-hidden="true">📍</span>
+          <span class="mega-link-text"><strong>Contacto</strong><small>Escríbenos o llámanos</small></span>
+        </a>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <main class="page-shell">

@@ -1,15 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MsalService } from '@azure/msal-angular';
-
-interface EspecialidadDestacada {
-  nombre: string;
-  descripcion: string;
-  precio: string;
-  box: string;
-  icono: string;
-}
+import { ESPECIALIDADES } from '../shared/especialidades';
 
 @Component({
   selector: 'app-home',
@@ -58,12 +51,12 @@ interface EspecialidadDestacada {
         </ng-template>
       </div>
 
-      <!-- Lado visual del Hero con tarjeta flotante clínica -->
+      <!-- Lado visual del Hero con logo institucional y tarjeta flotante -->
       <div class="hero-visual" aria-hidden="true">
-        <div class="hero-orbit">
-          <div class="orbit-ring ring-one"></div>
-          <div class="orbit-ring ring-two"></div>
-          <img src="logo.png" alt="Logo VidaSalud" class="health-logo-img" />
+        <div class="hero-emblem">
+          <div class="emblem-ring ring-outer"></div>
+          <div class="emblem-ring ring-inner"></div>
+          <img src="logo.png" alt="Logo VidaSalud" class="emblem-logo" />
         </div>
         <div class="hero-badge-card">
           <div class="badge-card-header">
@@ -75,6 +68,26 @@ interface EspecialidadDestacada {
         </div>
       </div>
     </section>
+
+    <!-- Tarjeta de accesos rápidos -->
+    <div class="quick-access-wrap">
+      <div class="quick-access-card reveal">
+        <a class="quick-access-item" routerLink="/appointments">
+          <span class="qa-icon" aria-hidden="true">📅</span>
+          <span class="qa-text"><strong>Agendar hora</strong><small>Elige tu especialidad y reserva</small></span>
+        </a>
+        <span class="qa-divider" aria-hidden="true"></span>
+        <a class="quick-access-item" routerLink="/appointments">
+          <span class="qa-icon" aria-hidden="true">🗂️</span>
+          <span class="qa-text"><strong>Mis atenciones</strong><small>Revisa el estado de tus citas</small></span>
+        </a>
+        <span class="qa-divider" aria-hidden="true"></span>
+        <a class="quick-access-item" routerLink="/" fragment="especialidades">
+          <span class="qa-icon" aria-hidden="true">📋</span>
+          <span class="qa-text"><strong>Especialidades</strong><small>Conoce valores y boxes</small></span>
+        </a>
+      </div>
+    </div>
 
     <!-- Sección: ¿Cómo funciona VidaSalud? -->
     <section class="how-it-works">
@@ -126,27 +139,18 @@ interface EspecialidadDestacada {
           </div>
         </article>
 
-        <div class="showcase-col">
-          <article class="showcase-card reveal">
-            <img src="img-seguimiento.jpg" alt="Enfermera mostrando resultados en una tablet a una paciente adulta mayor" loading="lazy" />
-            <div class="showcase-overlay">
-              <span class="showcase-tag">Cercanía</span>
-              <h3>Seguimiento humano y personalizado</h3>
-            </div>
-          </article>
-          <article class="showcase-card reveal">
-            <img src="img-monitoreo.jpg" alt="Médico con estetoscopio revisando signos vitales desde un dispositivo móvil" loading="lazy" />
-            <div class="showcase-overlay">
-              <span class="showcase-tag">Monitoreo</span>
-              <h3>Control cardiovascular conectado</h3>
-            </div>
-          </article>
-        </div>
+        <article class="showcase-card reveal">
+          <img src="img-monitoreo.jpg" alt="Médico con estetoscopio revisando signos vitales desde un dispositivo móvil" loading="lazy" />
+          <div class="showcase-overlay">
+            <span class="showcase-tag">Monitoreo</span>
+            <h3>Control cardiovascular conectado</h3>
+          </div>
+        </article>
       </div>
     </section>
 
     <!-- Sección: Especialidades Clínicas Destacadas -->
-    <section class="specialties-section">
+    <section class="specialties-section" id="especialidades">
       <div class="section-title-wrap reveal">
         <span class="eyebrow">PRESTACIONES CLÍNICAS</span>
         <h2>Especialidades Médicas Disponibles</h2>
@@ -154,7 +158,7 @@ interface EspecialidadDestacada {
       </div>
 
       <div class="specialties-grid">
-        <article class="spec-card reveal" *ngFor="let esp of especialidades">
+        <article class="spec-card reveal" *ngFor="let esp of especialidades" [id]="esp.slug">
           <div class="spec-icon-wrap">{{ esp.icono }}</div>
           <div class="spec-info">
             <div class="spec-top">
@@ -196,13 +200,17 @@ interface EspecialidadDestacada {
           <p class="footer-desc">Red de atención clínica, salud digital y gestión médica integral.</p>
         </div>
         <div class="footer-info">
-          <div>
+          <div id="horario">
             <strong>Horario de Atención</strong>
             <p>Lunes a Viernes: 08:00 - 20:00 hrs<br>Sábados: 09:00 - 14:00 hrs</p>
           </div>
-          <div>
+          <div id="seguridad">
             <strong>Seguridad Institucional</strong>
             <p>Plataforma protegida con Microsoft Entra ID y cifrado de datos clínicos.</p>
+          </div>
+          <div id="contacto">
+            <strong>Contacto</strong>
+            <p>600 360 7777<br>contacto&#64;vidasalud.cl</p>
           </div>
         </div>
       </div>
@@ -215,64 +223,47 @@ interface EspecialidadDestacada {
 export class HomeComponent implements AfterViewInit, OnDestroy {
   private observer?: IntersectionObserver;
 
-  especialidades: EspecialidadDestacada[] = [
-    {
-      nombre: 'Medicina General',
-      descripcion: 'Evaluación clínica integral, diagnósticos preventivos y tratamiento de patologías frecuentes.',
-      precio: '$15.000',
-      box: 'Box 1',
-      icono: '🩺'
-    },
-    {
-      nombre: 'Pediatría y Control Niño Sano',
-      descripcion: 'Atención especializada para recién nacidos, niños y adolescentes con enfoque preventivo.',
-      precio: '$22.000',
-      box: 'Box 2',
-      icono: '👶'
-    },
-    {
-      nombre: 'Kinesiología y Rehabilitación',
-      descripcion: 'Recuperación funcional motora, terapia respiratoria y tratamiento músculo-esquelético.',
-      precio: '$18.000',
-      box: 'Box 3',
-      icono: '🏃'
-    },
-    {
-      nombre: 'Cardiología Preventiva',
-      descripcion: 'Chequeos cardiovasculares, control de hipertensión y evaluaciones médicas de esfuerzo.',
-      precio: '$28.000',
-      box: 'Box 4',
-      icono: '❤️'
-    }
-  ];
+  especialidades = ESPECIALIDADES;
 
-  constructor(private msal: MsalService, private host: ElementRef<HTMLElement>) {}
+  constructor(private msal: MsalService, private host: ElementRef<HTMLElement>, private route: ActivatedRoute) {}
 
   ngAfterViewInit(): void {
     const elementos = this.host.nativeElement.querySelectorAll('.reveal');
 
     if (!('IntersectionObserver' in window)) {
       elementos.forEach(el => el.classList.add('in-view'));
-      return;
+    } else {
+      this.observer = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in-view');
+              this.observer?.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+      );
+
+      elementos.forEach(el => this.observer?.observe(el));
     }
 
-    this.observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('in-view');
-            this.observer?.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
-    );
-
-    elementos.forEach(el => this.observer?.observe(el));
+    this.route.fragment.subscribe(fragment => this.manejarFragmento(fragment));
   }
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+  }
+
+  private manejarFragmento(fragment: string | null): void {
+    if (!fragment || !this.especialidades.some(e => e.slug === fragment)) return;
+
+    requestAnimationFrame(() => {
+      const el = this.host.nativeElement.querySelector(`#${fragment}`);
+      if (!el) return;
+      el.classList.add('pulse-highlight');
+      setTimeout(() => el.classList.remove('pulse-highlight'), 1800);
+    });
   }
 
   get logueada(): boolean {

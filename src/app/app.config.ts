@@ -1,5 +1,5 @@
 import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {
   PublicClientApplication, IPublicClientApplication,
@@ -48,7 +48,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' })),
     provideHttpClient(withInterceptorsFromDi()),
     { provide: MSAL_INSTANCE, useFactory: MSALInstanceFactory },
     { provide: MSAL_GUARD_CONFIG, useFactory: MSALGuardConfigFactory },
