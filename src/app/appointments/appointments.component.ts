@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.service';
+import { AdminPanelComponent } from '../admin/admin-panel.component';
 
 @Component({
   selector: 'app-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminPanelComponent],
   template: `
     <!-- Mensajes de Alerta -->
     <div *ngIf="exitoMensaje" class="alert-banner alert-success">
@@ -240,9 +241,9 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
     </ng-container>
 
     <!-- ========================================================================= -->
-    <!-- 2. VISTA DE ADMINISTRADOR / RECEPCIONISTA (PANEL OPERATIVO)               -->
+    <!-- 2. VISTA DE RECEPCIONISTA (PANEL OPERATIVO)                              -->
     <!-- ========================================================================= -->
-    <ng-container *ngIf="modoActivo === 'admin'">
+    <ng-container *ngIf="modoActivo === 'recepcion'">
       <div class="admin-console">
       <section class="dashboard-hero dashboard-hero-admin">
         <div class="page-heading">
@@ -477,6 +478,15 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
       </section>
       </div>
     </ng-container>
+
+    <!-- ========================================================================= -->
+    <!-- 3. VISTA DE ADMINISTRADOR (GESTIÓN DE CATÁLOGO, MÉTRICAS Y SUPERVISIÓN)  -->
+    <!-- ========================================================================= -->
+    <ng-container *ngIf="modoActivo === 'admin'">
+      <div class="admin-console">
+        <app-admin-panel [atenciones]="atenciones" [yo]="yo"></app-admin-panel>
+      </div>
+    </ng-container>
   `
 })
 export class AppointmentsComponent implements OnInit {
@@ -560,12 +570,18 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
-  get esAdmin(): boolean {
-    return this.yo?.roles?.some(r => r === 'Admin' || r === 'Recepcionista') ?? false;
+  get esAdminRole(): boolean {
+    return this.yo?.roles?.includes('Admin') ?? false;
   }
 
-  get modoActivo(): 'paciente' | 'admin' {
-    return this.esAdmin ? 'admin' : 'paciente';
+  get esRecepcionista(): boolean {
+    return this.yo?.roles?.includes('Recepcionista') ?? false;
+  }
+
+  get modoActivo(): 'paciente' | 'recepcion' | 'admin' {
+    if (this.esAdminRole) return 'admin';
+    if (this.esRecepcionista) return 'recepcion';
+    return 'paciente';
   }
 
   get misAtenciones(): Appointment[] {

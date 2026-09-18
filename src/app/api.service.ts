@@ -84,6 +84,18 @@ export class ApiService {
     );
   }
 
+  createService(data: { nombre: string; precio: number; boxId?: number; cuposDisponibles: number }): Observable<ClinicalService> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.post<ClinicalService>(`${this.base}/api/catalog/services`, data, { headers }))
+    );
+  }
+
+  updateService(id: number, data: Partial<ClinicalService>): Observable<ClinicalService> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.put<ClinicalService>(`${this.base}/api/catalog/services/${id}`, data, { headers }))
+    );
+  }
+
   getMe(): Observable<UserProfile> {
     return this.getHeaders().pipe(
       switchMap(headers => this.http.get<UserProfile>(`${this.base}/api/me`, { headers }))

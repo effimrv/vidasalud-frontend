@@ -317,7 +317,7 @@ html { scroll-behavior: smooth; }
 .form-group-full { grid-column: 1 / -1; }
 .form-control { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; color: var(--ink); background: var(--white); transition: border-color .15s ease; }
 .form-control:focus { outline: none; border-color: var(--teal); }
-.form-actions { display: flex; justify-content: flex-end; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; }
 .form-actions .button-primary { margin-top: 4px; }
 
 /* Chips de horario en el formulario de agendamiento */
@@ -414,6 +414,27 @@ tr:last-child td { border-bottom: 0; }
 
 .admin-console .search-input { background: var(--surface-alt); }
 
+/* Pestañas principales del Panel de Administrador (Catálogo / Métricas / Supervisión) */
+.admin-tabs { display: flex; gap: 6px; margin-bottom: 20px; background: #123447; padding: 6px; border-radius: 10px; overflow-x: auto; }
+.admin-tab-btn { display: inline-flex; align-items: center; gap: 8px; flex: 1; justify-content: center; white-space: nowrap; padding: 12px 16px; border: 0; border-radius: 8px; background: transparent; color: #9fc3c7; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+.admin-tab-btn:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.admin-tab-active { background: var(--teal) !important; color: #fff !important; }
+.admin-tab-icon { font-size: 15px; }
+
+/* Variantes de tarjetas de métricas */
+.stats-row-half { grid-template-columns: repeat(2, 1fr); }
+.stat-text { font-size: 18px !important; }
+
+/* Acción destacada dentro de la cabecera de un panel (ej. "+ Nueva Especialidad") */
+.btn-header-action { margin-top: 0 !important; }
+
+/* Modal (Nueva Especialidad / Editar Especialidad) */
+.modal-overlay { position: fixed; inset: 0; background: rgba(9, 23, 31, .55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; animation: modalFadeIn .15s ease; }
+.modal-card { background: var(--white); border-radius: 14px; padding: 28px; max-width: 540px; width: 100%; box-shadow: 0 24px 60px rgba(9, 23, 31, .35); max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.modal-header h3 { margin: 0; font: 700 20px 'Space Grotesk'; color: var(--heading); }
+@keyframes modalFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
 /* Catálogo de Servicios (Appointments) */
 .catalog-section { margin-top: 36px; }
 .section-heading h2 { margin: 0 0 4px; font: 700 24px 'Space Grotesk'; }
@@ -477,6 +498,8 @@ body.dark-mode a:focus-visible, body.dark-mode button:focus-visible, body.dark-m
 	.page-heading h1 { font-size: 32px; }
 	.dashboard-hero { padding: 24px; }
 	.admin-filters { flex-wrap: wrap; }
+	.admin-tabs { flex-wrap: wrap; }
+	.admin-tab-btn { flex: 1 1 100%; }
 	.cta-banner { flex-direction: column; align-items: flex-start; }
 	.showcase-card { min-height: 180px; }
 	.showcase-card-tall { min-height: 180px; }
