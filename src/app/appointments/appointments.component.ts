@@ -74,12 +74,12 @@ import { AdminPanelComponent } from '../admin/admin-panel.component';
               <input
                 id="pacienteNombre"
                 type="text"
-                class="form-control"
-                [(ngModel)]="nuevoPacienteNombre"
-                name="pacienteNombre"
-                placeholder="Ingresa tu nombre completo"
-                required
+                class="form-control form-control-readonly"
+                [value]="yo?.nombre || ''"
+                readonly
+                disabled
               />
+              <small class="text-subtle">👤 Paciente: {{ yo?.nombre }} (Sesión verificada ✓)</small>
             </div>
 
             <div class="form-group">
@@ -140,7 +140,7 @@ import { AdminPanelComponent } from '../admin/admin-panel.component';
             <button
               type="submit"
               class="button button-primary"
-              [disabled]="guardandoCita || !nuevoServicioId || !nuevoPacienteNombre || !nuevaFecha || !nuevaHora"
+              [disabled]="guardandoCita || !nuevoServicioId || !yo?.nombre || !nuevaFecha || !nuevaHora"
             >
               <span *ngIf="guardandoCita" class="spinner"></span>
               {{ guardandoCita ? 'Registrando cita...' : '+ Confirmar Solicitud de Cita' }}
@@ -497,7 +497,6 @@ export class AppointmentsComponent implements OnInit {
   ultimaActualizacion: string = 'hace instantes';
 
   // Formulario de nueva cita
-  nuevoPacienteNombre: string = '';
   nuevoServicioId: number | null = null;
   nuevaFecha: string = '';
   nuevaHora: string = '';
@@ -534,9 +533,6 @@ export class AppointmentsComponent implements OnInit {
     this.api.getMe().subscribe({
       next: r => {
         this.yo = r;
-        if (r.nombre && !this.nuevoPacienteNombre) {
-          this.nuevoPacienteNombre = r.nombre;
-        }
       },
       error: err => console.warn('No se pudo obtener información del usuario:', err)
     });
@@ -684,8 +680,9 @@ export class AppointmentsComponent implements OnInit {
   }
 
   agendarCita(): void {
-    if (!this.nuevoServicioId || !this.nuevoPacienteNombre.trim() || !this.nuevaFecha || !this.nuevaHora) {
-      this.errorMensaje = 'Por favor ingresa tu nombre y selecciona especialidad, fecha y horario.';
+    const nombrePaciente = this.yo?.nombre?.trim();
+    if (!this.nuevoServicioId || !nombrePaciente || !this.nuevaFecha || !this.nuevaHora) {
+      this.errorMensaje = 'No se pudo verificar tu sesión. Vuelve a iniciar sesión y selecciona especialidad, fecha y horario.';
       return;
     }
 
@@ -695,7 +692,7 @@ export class AppointmentsComponent implements OnInit {
     this.exitoMensaje = '';
 
     this.api.createAppointment({
-      pacienteNombre: this.nuevoPacienteNombre.trim(),
+      pacienteNombre: nombrePaciente,
       servicioId: this.nuevoServicioId,
       boxId: servicio?.boxId || 1,
       fechaHora: `${this.nuevaFecha}T${this.nuevaHora}:00`

@@ -317,6 +317,8 @@ html { scroll-behavior: smooth; }
 .form-group-full { grid-column: 1 / -1; }
 .form-control { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; color: var(--ink); background: var(--white); transition: border-color .15s ease; }
 .form-control:focus { outline: none; border-color: var(--teal); }
+.form-control-readonly { background: var(--surface-alt); color: var(--muted); cursor: not-allowed; }
+.form-control-readonly:focus { border-color: var(--line); }
 .form-actions { display: flex; justify-content: flex-end; gap: 12px; }
 .form-actions .button-primary { margin-top: 4px; }
 
