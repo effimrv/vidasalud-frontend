@@ -314,10 +314,21 @@ html { scroll-behavior: smooth; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label { font-size: 13px; font-weight: 600; color: var(--ink); }
+.form-group-full { grid-column: 1 / -1; }
 .form-control { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; color: var(--ink); background: var(--white); transition: border-color .15s ease; }
 .form-control:focus { outline: none; border-color: var(--teal); }
 .form-actions { display: flex; justify-content: flex-end; }
 .form-actions .button-primary { margin-top: 4px; }
+
+/* Chips de horario en el formulario de agendamiento */
+.time-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.time-chip { padding: 9px 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--white); color: var(--ink); font-weight: 600; font-size: 13px; cursor: pointer; transition: all .15s ease; }
+.time-chip:hover { border-color: var(--teal); color: var(--teal); }
+.time-chip.selected { background: var(--teal); border-color: var(--teal); color: #fff; }
+
+/* Resumen de reserva antes de confirmar */
+.booking-summary { display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 12px 16px; background: var(--chip); border: 1px solid rgba(30, 155, 145, .3); border-radius: 10px; font-size: 13px; color: var(--ink); }
+.booking-summary-icon { font-size: 16px; }
 
 /* Tabla y Paneles */
 .table-panel { overflow: hidden; margin-bottom: 28px; }

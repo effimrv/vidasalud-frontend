@@ -96,13 +96,50 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
                 </option>
               </select>
             </div>
+
+            <div class="form-group">
+              <label for="fechaCita">Fecha de la cita</label>
+              <input
+                id="fechaCita"
+                type="date"
+                class="form-control"
+                [(ngModel)]="nuevaFecha"
+                name="fechaCita"
+                [min]="fechaMinima"
+                required
+              />
+            </div>
+
+            <div class="form-group form-group-full">
+              <label>Horario disponible</label>
+              <div class="time-chips">
+                <button
+                  type="button"
+                  *ngFor="let hora of bloquesHorario"
+                  class="time-chip"
+                  [class.selected]="nuevaHora === hora"
+                  (click)="nuevaHora = hora"
+                >
+                  {{ hora }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-summary" *ngIf="nuevoServicioId && nuevaFecha && nuevaHora">
+            <span class="booking-summary-icon" aria-hidden="true">📋</span>
+            <span>
+              Vas a reservar <strong>{{ getServicioNombre(nuevoServicioId) }}</strong>
+              para el <strong>{{ formatearFechaCorta(nuevaFecha) }}</strong>
+              a las <strong>{{ nuevaHora }} hrs</strong>.
+            </span>
           </div>
 
           <div class="form-actions">
             <button
               type="submit"
               class="button button-primary"
-              [disabled]="guardandoCita || !nuevoServicioId || !nuevoPacienteNombre"
+              [disabled]="guardandoCita || !nuevoServicioId || !nuevoPacienteNombre || !nuevaFecha || !nuevaHora"
             >
               <span *ngIf="guardandoCita" class="spinner"></span>
               {{ guardandoCita ? 'Registrando cita...' : '+ Confirmar Solicitud de Cita' }}
@@ -128,7 +165,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
                 <th>ID</th>
                 <th>Especialidad / Servicio</th>
                 <th>Estado de la Cita</th>
-                <th>Fecha de Solicitud</th>
+                <th>Cita Agendada Para</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -146,7 +183,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
                     {{ getEstadoLegible(a.estado) }}
                   </span>
                 </td>
-                <td>{{ formatearFecha(a.creadaEn) }}</td>
+                <td>{{ formatearFechaHoraCita(a.fechaHora) }}</td>
                 <td>
                   <button
                     *ngIf="a.estado === 'SOLICITADA'"
@@ -323,7 +360,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
                 <th>ID</th>
                 <th>Paciente</th>
                 <th>Servicio / Prestación</th>
-                <th>Fecha Solicitud</th>
+                <th>Cita Agendada Para</th>
                 <th>Estado</th>
                 <th class="th-actions">Acciones Operativas</th>
               </tr>
@@ -338,7 +375,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
                   {{ getServicioNombre(a.servicioId) }}
                   <small class="text-subtle d-block" *ngIf="a.boxId">Box {{ a.boxId }}</small>
                 </td>
-                <td>{{ formatearFecha(a.creadaEn) }}</td>
+                <td>{{ formatearFechaHoraCita(a.fechaHora) }}</td>
                 <td>
                   <span class="status-badge" [ngClass]="'badge-' + a.estado.toLowerCase()">
                     {{ a.estado }}
@@ -450,8 +487,22 @@ export class AppointmentsComponent implements OnInit {
   // Formulario de nueva cita
   nuevoPacienteNombre: string = '';
   nuevoServicioId: number | null = null;
+  nuevaFecha: string = '';
+  nuevaHora: string = '';
   guardandoCita: boolean = false;
   procesandoId: number | null = null;
+
+  readonly bloquesHorario: string[] = [
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '15:00', '15:30', '16:00', '16:30'
+  ];
+
+  readonly fechaMinima: string = (() => {
+    const hoy = new Date();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    return `${hoy.getFullYear()}-${mm}-${dd}`;
+  })();
 
   // Filtros Admin
   filtroEstado: string = 'TODAS';
@@ -584,16 +635,23 @@ export class AppointmentsComponent implements OnInit {
     }).format(valor);
   }
 
-  formatearFecha(fechaIso?: string): string {
-    if (!fechaIso) return 'Reciente';
+  formatearFechaHoraCita(fechaHora?: string): string {
+    if (!fechaHora) return 'Por confirmar';
     try {
-      const d = new Date(fechaIso);
-      return d.toLocaleDateString('es-CL', {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      const d = new Date(fechaHora);
+      const dia = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
+      const hora = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return `${dia}, ${hora} hrs`;
+    } catch {
+      return fechaHora;
+    }
+  }
+
+  formatearFechaCorta(fechaIso: string): string {
+    try {
+      const [anio, mes, dia] = fechaIso.split('-').map(Number);
+      const d = new Date(anio, mes - 1, dia);
+      return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'long' });
     } catch {
       return fechaIso;
     }
@@ -608,8 +666,8 @@ export class AppointmentsComponent implements OnInit {
   }
 
   agendarCita(): void {
-    if (!this.nuevoServicioId || !this.nuevoPacienteNombre.trim()) {
-      this.errorMensaje = 'Por favor ingresa tu nombre y selecciona una prestación médica.';
+    if (!this.nuevoServicioId || !this.nuevoPacienteNombre.trim() || !this.nuevaFecha || !this.nuevaHora) {
+      this.errorMensaje = 'Por favor ingresa tu nombre y selecciona especialidad, fecha y horario.';
       return;
     }
 
@@ -621,11 +679,14 @@ export class AppointmentsComponent implements OnInit {
     this.api.createAppointment({
       pacienteNombre: this.nuevoPacienteNombre.trim(),
       servicioId: this.nuevoServicioId,
-      boxId: servicio?.boxId || 1
+      boxId: servicio?.boxId || 1,
+      fechaHora: `${this.nuevaFecha}T${this.nuevaHora}:00`
     }).subscribe({
       next: nueva => {
         this.guardandoCita = false;
-        this.exitoMensaje = `¡Cita médica solicitada con éxito para ${nueva.pacienteNombre}! Tu solicitud está en revisión.`;
+        this.exitoMensaje = `¡Cita médica solicitada con éxito para ${nueva.pacienteNombre}, agendada para el ${this.formatearFechaHoraCita(nueva.fechaHora)}!`;
+        this.nuevaFecha = '';
+        this.nuevaHora = '';
         this.recargarAtenciones();
       },
       error: err => {

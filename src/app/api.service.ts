@@ -17,6 +17,8 @@ export interface Appointment {
   boxId?: number;
   estado: 'SOLICITADA' | 'CONFIRMADA' | 'EN_ESPERA' | 'EN_ATENCION' | 'CERRADA' | 'CANCELADA';
   creadaEn?: string;
+  /** Fecha y hora para la que se agendó la atención (distinto de creadaEn, que es cuándo se solicitó). */
+  fechaHora?: string;
 }
 
 export interface ClinicalService {
@@ -64,7 +66,7 @@ export class ApiService {
     );
   }
 
-  createAppointment(cita: { pacienteNombre: string; servicioId: number; boxId?: number }): Observable<Appointment> {
+  createAppointment(cita: { pacienteNombre: string; servicioId: number; boxId?: number; fechaHora?: string }): Observable<Appointment> {
     return this.getHeaders().pipe(
       switchMap(headers => this.http.post<Appointment>(`${this.base}/api/appointments`, cita, { headers }))
     );
