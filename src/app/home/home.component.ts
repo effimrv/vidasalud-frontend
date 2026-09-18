@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MsalService } from '@azure/msal-angular';
@@ -63,7 +63,7 @@ interface EspecialidadDestacada {
         <div class="hero-orbit">
           <div class="orbit-ring ring-one"></div>
           <div class="orbit-ring ring-two"></div>
-          <div class="health-symbol">+</div>
+          <img src="logo.png" alt="Logo VidaSalud" class="health-logo-img" />
         </div>
         <div class="hero-badge-card">
           <div class="badge-card-header">
@@ -78,28 +78,28 @@ interface EspecialidadDestacada {
 
     <!-- Sección: ¿Cómo funciona VidaSalud? -->
     <section class="how-it-works">
-      <div class="section-title-wrap">
+      <div class="section-title-wrap reveal">
         <span class="eyebrow">PASO A PASO</span>
         <h2>¿Cómo funciona nuestra plataforma?</h2>
         <p>Accede a tus servicios médicos en tres pasos sencillos y sin trámites complejos.</p>
       </div>
 
       <div class="feature-grid">
-        <article class="feature-card feature-card-highlight">
+        <article class="feature-card feature-card-highlight reveal">
           <span class="feature-icon">01</span>
           <div>
             <h2>Acceso Unificado</h2>
             <p>Ingresa con tu cuenta institucional o personal de Microsoft Entra ID de manera segura y sin memorizar claves extra.</p>
           </div>
         </article>
-        <article class="feature-card">
+        <article class="feature-card reveal">
           <span class="feature-icon icon-teal">02</span>
           <div>
             <h2>Reserva y Catálogo</h2>
             <p>Elige tu prestación médica, conoce el valor de la consulta y reserva de forma inmediata en los boxes habilitados.</p>
           </div>
         </article>
-        <article class="feature-card">
+        <article class="feature-card reveal">
           <span class="feature-icon icon-coral">03</span>
           <div>
             <h2>Seguimiento en Vivo</h2>
@@ -109,16 +109,52 @@ interface EspecialidadDestacada {
       </div>
     </section>
 
+    <!-- Sección: Comprometidos con tu salud (Showcase visual) -->
+    <section class="showcase-section">
+      <div class="section-title-wrap reveal">
+        <span class="eyebrow">NUESTRA ATENCIÓN</span>
+        <h2>Comprometidos con tu salud, en cada etapa</h2>
+        <p>Un equipo clínico real, presente en la prevención, el control y el seguimiento de cada paciente.</p>
+      </div>
+
+      <div class="showcase-grid">
+        <article class="showcase-card showcase-card-tall reveal">
+          <img src="img-vacunacion.jpg" alt="Médico aplicando una vacuna a una paciente en sala de espera" loading="lazy" />
+          <div class="showcase-overlay">
+            <span class="showcase-tag">Prevención</span>
+            <h3>Vacunación y controles preventivos</h3>
+          </div>
+        </article>
+
+        <div class="showcase-col">
+          <article class="showcase-card reveal">
+            <img src="img-seguimiento.jpg" alt="Enfermera mostrando resultados en una tablet a una paciente adulta mayor" loading="lazy" />
+            <div class="showcase-overlay">
+              <span class="showcase-tag">Cercanía</span>
+              <h3>Seguimiento humano y personalizado</h3>
+            </div>
+          </article>
+          <article class="showcase-card reveal">
+            <img src="img-monitoreo.jpg" alt="Médico con estetoscopio revisando signos vitales desde un dispositivo móvil" loading="lazy" />
+            <div class="showcase-overlay">
+              <span class="showcase-tag">Monitoreo</span>
+              <h3>Control cardiovascular conectado</h3>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- Sección: Especialidades Clínicas Destacadas -->
     <section class="specialties-section">
-      <div class="section-title-wrap">
+      <div class="section-title-wrap reveal">
         <span class="eyebrow">PRESTACIONES CLÍNICAS</span>
         <h2>Especialidades Médicas Disponibles</h2>
         <p>Profesionales capacitados para el cuidado de tu salud y la de tu familia.</p>
       </div>
 
       <div class="specialties-grid">
-        <article class="spec-card" *ngFor="let esp of especialidades">
+        <article class="spec-card reveal" *ngFor="let esp of especialidades">
           <div class="spec-icon-wrap">{{ esp.icono }}</div>
           <div class="spec-info">
             <div class="spec-top">
@@ -135,7 +171,8 @@ interface EspecialidadDestacada {
       </div>
 
       <!-- Banner de invitación a ingresar si no está logueado -->
-      <div *ngIf="!logueada" class="cta-banner">
+      <div *ngIf="!logueada" class="cta-banner reveal">
+        <img src="img-telemedicina.jpg" alt="" class="cta-banner-img" aria-hidden="true" />
         <div class="cta-banner-text">
           <h3>¿Necesitas agendar alguna de estas atenciones?</h3>
           <p>Identifícate con tu cuenta Microsoft para acceder de inmediato a la reserva de horas y tus citas médicas.</p>
@@ -153,7 +190,7 @@ interface EspecialidadDestacada {
       <div class="footer-content">
         <div>
           <div class="brand brand-footer">
-            <span class="brand-mark">V</span>
+            <img src="logo.png" alt="Logo VidaSalud" class="brand-img" />
             <span>VidaSalud</span>
           </div>
           <p class="footer-desc">Red de atención clínica, salud digital y gestión médica integral.</p>
@@ -175,7 +212,9 @@ interface EspecialidadDestacada {
     </footer>
   `
 })
-export class HomeComponent {
+export class HomeComponent implements AfterViewInit, OnDestroy {
+  private observer?: IntersectionObserver;
+
   especialidades: EspecialidadDestacada[] = [
     {
       nombre: 'Medicina General',
@@ -207,7 +246,34 @@ export class HomeComponent {
     }
   ];
 
-  constructor(private msal: MsalService) {}
+  constructor(private msal: MsalService, private host: ElementRef<HTMLElement>) {}
+
+  ngAfterViewInit(): void {
+    const elementos = this.host.nativeElement.querySelectorAll('.reveal');
+
+    if (!('IntersectionObserver' in window)) {
+      elementos.forEach(el => el.classList.add('in-view'));
+      return;
+    }
+
+    this.observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            this.observer?.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+    );
+
+    elementos.forEach(el => this.observer?.observe(el));
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
 
   get logueada(): boolean {
     return this.msal.instance.getAllAccounts().length > 0;

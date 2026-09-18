@@ -20,6 +20,7 @@ a { color: inherit; text-decoration: none; }
 .topbar { min-height: 76px; padding: 0 6vw; display: flex; align-items: center; gap: 42px; color: var(--white); background: var(--navy); }
 .brand { display: flex; align-items: center; gap: 10px; font: 700 20px 'Space Grotesk', sans-serif; letter-spacing: -.3px; }
 .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; color: var(--navy); background: #b8e5dc; border-radius: 10px; }
+.brand-img { width: 34px; height: 34px; object-fit: contain; border-radius: 8px; display: block; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)); }
 .nav-links { display: flex; gap: 28px; height: 76px; align-items: center; color: #b8cbd0; font-size: 14px; }
 .nav-links a { height: 100%; display: grid; place-items: center; border-bottom: 3px solid transparent; }
 .nav-links a.active, .nav-links a:hover { color: #fff; border-bottom-color: #7ed3c7; }
@@ -84,6 +85,8 @@ a { color: inherit; text-decoration: none; }
 .orbit-ring { position: absolute; inset: 0; border: 1px solid rgba(184, 229, 220, .35); border-radius: 50%; }
 .ring-two { inset: 32px; border-color: rgba(238, 118, 95, .65); }
 .health-symbol { position: absolute; top: 50%; left: 50%; display: grid; width: 76px; height: 76px; place-items: center; transform: translate(-50%, -50%); color: var(--navy); background: #b8e5dc; border-radius: 22px; font: 500 52px/1 'Space Grotesk'; }
+.health-logo-img { position: absolute; top: 50%; left: 50%; width: 110px; height: 110px; object-fit: contain; transform: translate(-50%, -50%); filter: drop-shadow(0 12px 24px rgba(10, 38, 52, 0.35)); animation: logoPulse 4s ease-in-out infinite alternate; }
+@keyframes logoPulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.06); } }
 .hero-badge-card { position: absolute; bottom: -8px; right: -12px; background: #ffffff; color: var(--navy); border-radius: 14px; padding: 14px 18px; box-shadow: 0 16px 36px rgba(10, 38, 52, 0.22); border: 1px solid rgba(220, 231, 228, 0.8); display: flex; flex-direction: column; gap: 3px; max-width: 250px; z-index: 2; animation: floatCard 4s ease-in-out infinite; }
 @keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 .badge-card-header { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; color: var(--teal); letter-spacing: 0.5px; text-transform: uppercase; }
@@ -104,6 +107,32 @@ a { color: inherit; text-decoration: none; }
 .feature-card-highlight { border-top: 3px solid var(--coral); }.feature-icon { color: var(--coral); font: 700 13px 'Space Grotesk'; }.icon-teal { color: var(--teal); }.icon-coral { color: #d9a52d; }
 .feature-card h2 { margin: 0 0 6px; font: 600 17px 'Space Grotesk'; }.feature-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 
+/* Animaciones al hacer scroll (Reveal) */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.2, .7, .3, 1), transform .7s cubic-bezier(.2, .7, .3, 1); will-change: opacity, transform; }
+.reveal.in-view { opacity: 1; transform: translateY(0); }
+.feature-grid .reveal:nth-child(2) { transition-delay: .1s; }
+.feature-grid .reveal:nth-child(3) { transition-delay: .2s; }
+.specialties-grid .reveal:nth-child(2) { transition-delay: .08s; }
+.specialties-grid .reveal:nth-child(3) { transition-delay: .16s; }
+.specialties-grid .reveal:nth-child(4) { transition-delay: .24s; }
+.showcase-col .reveal:nth-child(2) { transition-delay: .15s; }
+@media (prefers-reduced-motion: reduce) {
+	.reveal { opacity: 1; transform: none; transition: none; }
+	.health-logo-img, .hero-badge-card, .spinner { animation: none; }
+}
+
+/* Sección: Comprometidos con tu salud (Showcase visual) */
+.showcase-section { margin-top: 54px; }
+.showcase-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; }
+.showcase-col { display: flex; flex-direction: column; gap: 18px; }
+.showcase-card { position: relative; overflow: hidden; border-radius: 16px; min-height: 210px; background: var(--navy); box-shadow: 0 10px 26px rgba(23, 48, 66, .1); }
+.showcase-card-tall { min-height: 100%; }
+.showcase-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.showcase-card:hover img { transform: scale(1.06); }
+.showcase-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; padding: 20px; background: linear-gradient(0deg, rgba(10, 30, 42, .88) 0%, rgba(10, 30, 42, .25) 55%, rgba(10, 30, 42, 0) 100%); }
+.showcase-tag { align-self: flex-start; padding: 4px 10px; border-radius: 20px; background: rgba(126, 211, 199, .22); border: 1px solid rgba(126, 211, 199, .5); color: #b8e5dc; font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; }
+.showcase-overlay h3 { margin: 0; color: #fff; font: 600 18px 'Space Grotesk', sans-serif; letter-spacing: -.2px; }
+
 /* Sección Especialidades Destacadas */
 .specialties-section { margin-top: 54px; }
 .specialties-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
@@ -119,7 +148,10 @@ a { color: inherit; text-decoration: none; }
 .spec-badge { color: #059669; background: #d1fae5; padding: 3px 8px; border-radius: 12px; font-size: 11px; }
 
 /* Banner de Invitación */
-.cta-banner { margin-top: 28px; background: linear-gradient(135deg, #17485b 0%, #123447 100%); color: white; padding: 28px 32px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.cta-banner { position: relative; overflow: hidden; margin-top: 28px; background: linear-gradient(135deg, #17485b 0%, #123447 100%); color: white; padding: 28px 32px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.cta-banner-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .16; mix-blend-mode: luminosity; }
+.cta-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(18, 52, 71, .96) 0%, rgba(18, 52, 71, .82) 45%, rgba(23, 72, 91, .7) 100%); }
+.cta-banner-text, .cta-banner > .button-hero-login-sm { position: relative; z-index: 1; }
 .cta-banner-text h3 { margin: 0 0 4px; font: 700 20px 'Space Grotesk', sans-serif; color: #fff; }
 .cta-banner-text p { margin: 0; color: #b8cbd0; font-size: 14px; }
 .button-hero-login-sm { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: var(--navy); border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all .2s ease; }
@@ -270,6 +302,8 @@ tr:last-child td { border-bottom: 0; }
 	.form-grid { grid-template-columns: 1fr; }
 	.hero-visual { width: 280px; }
 	.hero-badge-card { right: -6px; }
+	.showcase-grid { grid-template-columns: 1fr; }
+	.showcase-card-tall { min-height: 220px; }
 }
 
 @media (max-width: 700px) {
@@ -286,6 +320,8 @@ tr:last-child td { border-bottom: 0; }
 	.view-switcher-bar { flex-direction: column; align-items: start; gap: 12px; }
 	.switcher-buttons { flex-wrap: wrap; }
 	.cta-banner { flex-direction: column; align-items: flex-start; }
+	.showcase-card { min-height: 180px; }
+	.showcase-card-tall { min-height: 180px; }
 	.footer-content { flex-direction: column; gap: 24px; }
 	.footer-info { flex-direction: column; gap: 16px; }
 }
