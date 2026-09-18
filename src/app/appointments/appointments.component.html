@@ -1,0 +1,507 @@
+<!-- Mensajes de Alerta -->
+<div *ngIf="exitoMensaje" class="alert-banner alert-success">
+  <span>{{ exitoMensaje }}</span>
+  <button type="button" class="alert-close" (click)="exitoMensaje = ''">&times;</button>
+</div>
+<div *ngIf="errorMensaje" class="alert-banner alert-error">
+  <span>{{ errorMensaje }}</span>
+  <button type="button" class="alert-close" (click)="errorMensaje = ''">&times;</button>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 1. VISTA DE USUARIO / PACIENTE                                           -->
+<!-- ========================================================================= -->
+<ng-container *ngIf="modoActivo === 'paciente'">
+  <!-- Cabecera amigable del paciente -->
+  <section class="dashboard-hero">
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">PORTAL DEL PACIENTE · VIDA SALUD</span>
+        <h1>Mis Citas y Atenciones</h1>
+        <p>Revisa el estado de tus solicitudes médicas o agenda una nueva cita en línea.</p>
+      </div>
+      <div class="user-badge" *ngIf="yo">
+        <span class="avatar">{{ yo.nombre ? yo.nombre.charAt(0).toUpperCase() : 'U' }}</span>
+        <span>
+          <strong>{{ yo.nombre }}</strong>
+          <small>Paciente registrado</small>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resumen del Paciente -->
+  <section class="stats-row">
+    <article class="stat-card">
+      <span>Mis solicitudes registradas</span>
+      <strong>{{ misAtenciones.length }}</strong>
+    </article>
+    <article class="stat-card stat-card-accent">
+      <span>Próxima atención</span>
+      <strong>{{ proximaAtencion ? getEstadoLegible(proximaAtencion.estado) : 'Sin citas activas' }} <i></i></strong>
+    </article>
+    <article class="stat-card">
+      <span>Especialidades disponibles</span>
+      <strong>{{ catalogo.length }} prestaciones</strong>
+    </article>
+  </section>
+
+  <!-- Panel de Agendamiento de Nueva Cita -->
+  <section class="patient-card booking-panel" id="seccion-agendar">
+    <div class="panel-header-simple">
+      <div>
+        <span class="eyebrow">NUEVA ATENCIÓN</span>
+        <h2>Solicitar una Cita Médica</h2>
+        <p>Selecciona la prestación médica que requieres y confirma tu hora.</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="agendarCita()" class="booking-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="pacienteNombre">Nombre del Paciente</label>
+          <input
+            id="pacienteNombre"
+            type="text"
+            class="form-control form-control-readonly"
+            [value]="yo?.nombre || ''"
+            readonly
+            disabled
+          />
+          <small class="text-subtle">👤 Paciente: {{ yo?.nombre }} (Sesión verificada ✓)</small>
+        </div>
+
+        <div class="form-group">
+          <label for="servicioSelect">Especialidad / Prestación Médica</label>
+          <select
+            id="servicioSelect"
+            class="form-control"
+            [(ngModel)]="nuevoServicioId"
+            name="servicioId"
+            required
+          >
+            <option [ngValue]="null" disabled>-- Selecciona un servicio médico --</option>
+            <option *ngFor="let s of catalogo" [ngValue]="s.id">
+              {{ s.nombre }} — {{ formatearPrecio(s.precio) }} ({{ s.cuposDisponibles }} cupos disp.)
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fechaCita">Fecha de la cita</label>
+          <input
+            id="fechaCita"
+            type="date"
+            class="form-control"
+            [(ngModel)]="nuevaFecha"
+            name="fechaCita"
+            [min]="fechaMinima"
+            required
+          />
+        </div>
+
+        <div class="form-group form-group-full">
+          <label>Horario disponible</label>
+          <div class="time-chips">
+            <button
+              type="button"
+              *ngFor="let hora of bloquesHorario"
+              class="time-chip"
+              [class.selected]="nuevaHora === hora"
+              (click)="nuevaHora = hora"
+            >
+              {{ hora }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="booking-summary" *ngIf="nuevoServicioId && nuevaFecha && nuevaHora">
+        <span class="booking-summary-icon" aria-hidden="true">📋</span>
+        <span>
+          Vas a reservar <strong>{{ getServicioNombre(nuevoServicioId) }}</strong>
+          para el <strong>{{ formatearFechaCorta(nuevaFecha) }}</strong>
+          a las <strong>{{ nuevaHora }} hrs</strong>.
+        </span>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="button button-primary"
+          [disabled]="guardandoCita || !nuevoServicioId || !yo?.nombre || !nuevaFecha || !nuevaHora"
+        >
+          <span *ngIf="guardandoCita" class="spinner"></span>
+          {{ guardandoCita ? 'Registrando cita...' : '+ Confirmar Solicitud de Cita' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Sección "Mis Atenciones" -->
+  <section class="table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Historial de mis atenciones</h2>
+        <p>Seguimiento detallado de tus horas solicitadas y atenciones médicas</p>
+      </div>
+      <span class="record-count">{{ misAtenciones.length }} citas</span>
+    </div>
+
+    <div class="atenciones-list" *ngIf="misAtenciones.length > 0; else sinAtencionesPaciente">
+      <article class="atencion-card" *ngFor="let a of misAtenciones">
+        <div class="atencion-card-header">
+          <div>
+            <span class="atencion-id">#{{ a.id }}</span>
+            <h3>{{ getServicioNombre(a.servicioId) }}</h3>
+            <span class="atencion-precio" *ngIf="getServicioPrecio(a.servicioId)">
+              {{ formatearPrecio(getServicioPrecio(a.servicioId)!) }}
+            </span>
+          </div>
+          <span class="status-badge" [ngClass]="'badge-' + a.estado.toLowerCase()">
+            {{ getEstadoLegible(a.estado) }}
+          </span>
+        </div>
+
+        <div class="atencion-timeline">
+          <div class="atencion-timeline-item">
+            <span class="timeline-dot"></span>
+            <div>
+              <small>Solicitada el</small>
+              <strong>{{ formatearFechaHoraSolicitud(a.creadaEn) }}</strong>
+            </div>
+          </div>
+          <div class="atencion-timeline-item">
+            <span class="timeline-dot timeline-dot-accent"></span>
+            <div>
+              <small>{{ a.estado === 'CERRADA' ? 'Atendida el' : 'Cita agendada para' }}</small>
+              <strong>{{ formatearFechaHoraCita(a.fechaHora) }}</strong>
+            </div>
+          </div>
+          <div class="atencion-timeline-item" *ngIf="a.boxId">
+            <span class="timeline-dot"></span>
+            <div>
+              <small>Box asignado</small>
+              <strong>Box {{ a.boxId }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informe de Atención Médica: solo para citas ya finalizadas -->
+        <div class="informe-medico" *ngIf="a.estado === 'CERRADA' && getInformeMedico(a) as informe">
+          <span class="informe-medico-badge">✓ Atención Finalizada con Informe Médico</span>
+          <div class="informe-medico-body">
+            <div class="informe-medico-row">
+              <span class="informe-medico-label">Diagnóstico</span>
+              <p>{{ informe.diagnostico }}</p>
+            </div>
+            <div class="informe-medico-row">
+              <span class="informe-medico-label">Indicaciones y receta</span>
+              <p>{{ informe.indicaciones }}</p>
+            </div>
+            <div class="informe-medico-row">
+              <span class="informe-medico-label">Médico responsable</span>
+              <p>{{ informe.medico }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="atencion-card-actions" *ngIf="a.estado === 'SOLICITADA'">
+          <button
+            type="button"
+            class="btn-action-cancel"
+            (click)="cambiarEstado(a.id, 'CANCELADA')"
+            [disabled]="procesandoId === a.id"
+          >
+            Cancelar cita
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #sinAtencionesPaciente>
+      <div class="empty-state">
+        <span class="empty-icon">🩺</span>
+        <h3>Aún no tienes citas registradas</h3>
+        <p>Agenda tu primera hora médica arriba.</p>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- Catálogo de Servicios para el Paciente -->
+  <section class="catalog-section" *ngIf="catalogo.length > 0">
+    <div class="section-heading">
+      <h2>Prestaciones y Servicios de VidaSalud</h2>
+      <p>Conoce nuestras especialidades médicas disponibles con atención presencial.</p>
+    </div>
+    <div class="catalog-grid">
+      <article class="service-card" *ngFor="let serv of catalogo">
+        <div class="service-card-head">
+          <span class="service-icon">⚕️</span>
+          <span class="service-price">{{ formatearPrecio(serv.precio) }}</span>
+        </div>
+        <h3>{{ serv.nombre }}</h3>
+        <p class="service-desc">{{ getDescripcionServicio(serv.nombre) }}</p>
+        <p class="service-info">
+          Box asignado: <strong>Box {{ serv.boxId || '1' }}</strong><br />
+          Cupos disponibles: <strong>{{ serv.cuposDisponibles }}</strong>
+        </p>
+        <button
+          type="button"
+          class="button button-quiet btn-full"
+          (click)="seleccionarServicioParaAgendar(serv.id)"
+        >
+          Solicitar esta especialidad &rarr;
+        </button>
+      </article>
+    </div>
+  </section>
+</ng-container>
+
+<!-- ========================================================================= -->
+<!-- 2. VISTA DE RECEPCIONISTA (PANEL OPERATIVO)                              -->
+<!-- ========================================================================= -->
+<ng-container *ngIf="modoActivo === 'recepcion'">
+  <div class="admin-console">
+  <section class="dashboard-hero dashboard-hero-admin">
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">PANEL OPERATIVO · GESTIÓN CLÍNICA</span>
+        <h1>Control de Atenciones</h1>
+        <p>Supervisa las solicitudes de todos los pacientes, gestiona estados y asignación médica.</p>
+      </div>
+      <div class="user-badge badge-admin" *ngIf="yo">
+        <span class="avatar avatar-admin">🛡️</span>
+        <span>
+          <strong>{{ yo.nombre }}</strong>
+          <small>{{ yo.roles.join(', ') || 'Administrador' }}</small>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPIs Operativos -->
+  <section class="stats-row stats-admin">
+    <article class="stat-card">
+      <span>Total de solicitudes</span>
+      <strong>{{ atenciones.length }}</strong>
+    </article>
+    <article class="stat-card stat-card-warning">
+      <span>Pendientes por confirmar</span>
+      <strong>{{ countPorEstado('SOLICITADA') }}</strong>
+    </article>
+    <article class="stat-card stat-card-accent">
+      <span>En atención o espera</span>
+      <strong>{{ countPorEstado('EN_ESPERA') + countPorEstado('EN_ATENCION') }} <i></i></strong>
+    </article>
+    <article class="stat-card">
+      <span>Atenciones cerradas</span>
+      <strong>{{ countPorEstado('CERRADA') }}</strong>
+    </article>
+  </section>
+
+  <!-- Filtros y Búsqueda Operativa -->
+  <section class="table-panel">
+    <div class="panel-header admin-panel-header">
+      <div>
+        <h2>Todas las Solicitudes Clínicas</h2>
+        <p>Lista general de pacientes y actualización de estados en tiempo real · Actualizado {{ ultimaActualizacion }}</p>
+      </div>
+      <div class="admin-filters">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="terminoBusqueda"
+          placeholder="Buscar por paciente o ID..."
+        />
+        <button type="button" class="button-quiet btn-refresh" (click)="recargarAtenciones()" [disabled]="actualizando">
+          <span [class.spin]="actualizando" aria-hidden="true">⟳</span>
+          {{ actualizando ? 'Actualizando…' : 'Actualizar' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Pestañas de Filtro de Estado -->
+    <div class="status-tabs">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="filtroEstado === 'TODAS'"
+        (click)="filtroEstado = 'TODAS'"
+      >
+        Todas ({{ atenciones.length }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="filtroEstado === 'SOLICITADA'"
+        (click)="filtroEstado = 'SOLICITADA'"
+      >
+        Solicitadas ({{ countPorEstado('SOLICITADA') }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="filtroEstado === 'CONFIRMADA'"
+        (click)="filtroEstado = 'CONFIRMADA'"
+      >
+        Confirmadas ({{ countPorEstado('CONFIRMADA') }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="filtroEstado === 'EN_ESPERA'"
+        (click)="filtroEstado = 'EN_ESPERA'"
+      >
+        En Espera ({{ countPorEstado('EN_ESPERA') }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="filtroEstado === 'EN_ATENCION'"
+        (click)="filtroEstado = 'EN_ATENCION'"
+      >
+        En Consulta ({{ countPorEstado('EN_ATENCION') }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="filtroEstado === 'CERRADA'"
+        (click)="filtroEstado = 'CERRADA'"
+      >
+        Cerradas ({{ countPorEstado('CERRADA') }})
+      </button>
+    </div>
+
+    <div class="table-wrap" *ngIf="atencionesFiltradasAdmin.length > 0; else sinAtencionesAdmin">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Paciente</th>
+            <th>Servicio / Prestación</th>
+            <th>Cita Agendada Para</th>
+            <th>Estado</th>
+            <th class="th-actions">Acciones Operativas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of atencionesFiltradasAdmin">
+            <td class="id-cell">#{{ a.id }}</td>
+            <td>
+              <strong>{{ a.pacienteNombre }}</strong>
+            </td>
+            <td>
+              {{ getServicioNombre(a.servicioId) }}
+              <small class="text-subtle d-block" *ngIf="a.boxId">Box {{ a.boxId }}</small>
+            </td>
+            <td>{{ formatearFechaHoraCita(a.fechaHora) }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'badge-' + a.estado.toLowerCase()">
+                {{ a.estado }}
+              </span>
+            </td>
+            <td class="td-actions">
+              <div class="td-actions-inner">
+              <!-- Transición SOLICITADA -> CONFIRMADA o CANCELADA -->
+              <ng-container *ngIf="a.estado === 'SOLICITADA'">
+                <button
+                  type="button"
+                  class="btn-op btn-op-confirm"
+                  (click)="cambiarEstado(a.id, 'CONFIRMADA')"
+                  [disabled]="procesandoId === a.id"
+                >
+                  Confirmar
+                </button>
+                <button
+                  type="button"
+                  class="btn-op btn-op-cancel"
+                  (click)="cambiarEstado(a.id, 'CANCELADA')"
+                  [disabled]="procesandoId === a.id"
+                >
+                  Cancelar
+                </button>
+              </ng-container>
+
+              <!-- Transición CONFIRMADA -> EN_ESPERA o CANCELADA -->
+              <ng-container *ngIf="a.estado === 'CONFIRMADA'">
+                <button
+                  type="button"
+                  class="btn-op btn-op-step"
+                  (click)="cambiarEstado(a.id, 'EN_ESPERA')"
+                  [disabled]="procesandoId === a.id"
+                >
+                  A Sala de Espera
+                </button>
+                <button
+                  type="button"
+                  class="btn-op btn-op-cancel"
+                  (click)="cambiarEstado(a.id, 'CANCELADA')"
+                  [disabled]="procesandoId === a.id"
+                >
+                  Cancelar
+                </button>
+              </ng-container>
+
+              <!-- Transición EN_ESPERA -> EN_ATENCION o CANCELADA -->
+              <ng-container *ngIf="a.estado === 'EN_ESPERA'">
+                <button
+                  type="button"
+                  class="btn-op btn-op-attend"
+                  (click)="cambiarEstado(a.id, 'EN_ATENCION')"
+                  [disabled]="procesandoId === a.id"
+                >
+                  Llamar a Consulta
+                </button>
+                <button
+                  type="button"
+                  class="btn-op btn-op-cancel"
+                  (click)="cambiarEstado(a.id, 'CANCELADA')"
+                  [disabled]="procesandoId === a.id"
+                >
+                  Cancelar
+                </button>
+              </ng-container>
+
+              <!-- Transición EN_ATENCION -> CERRADA -->
+              <ng-container *ngIf="a.estado === 'EN_ATENCION'">
+                <button
+                  type="button"
+                  class="btn-op btn-op-close"
+                  (click)="cambiarEstado(a.id, 'CERRADA')"
+                  [disabled]="procesandoId === a.id"
+                >
+                  Finalizar Atención
+                </button>
+              </ng-container>
+
+              <!-- Estado final CERRADA / CANCELADA -->
+              <span *ngIf="a.estado === 'CERRADA' || a.estado === 'CANCELADA'" class="text-subtle">
+                Sin acciones pendientes
+              </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #sinAtencionesAdmin>
+      <div class="empty-state">
+        <span class="empty-icon">&#10003;</span>
+        <h3>No se encontraron atenciones</h3>
+        <p>No hay solicitudes que coincidan con el filtro actual o la búsqueda ingresada.</p>
+      </div>
+    </ng-template>
+  </section>
+  </div>
+</ng-container>
+
+<!-- ========================================================================= -->
+<!-- 3. VISTA DE ADMINISTRADOR (GESTIÓN DE CATÁLOGO, MÉTRICAS Y SUPERVISIÓN)  -->
+<!-- ========================================================================= -->
+<ng-container *ngIf="modoActivo === 'admin'">
+  <div class="admin-console">
+    <app-admin-panel [atenciones]="atenciones" [yo]="yo"></app-admin-panel>
+  </div>
+</ng-container>

@@ -1,0 +1,312 @@
+<section class="dashboard-hero dashboard-hero-admin">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">PANEL DE ADMINISTRACIÓN · VIDA SALUD</span>
+      <h1>Gestión Clínica</h1>
+      <p>Administra el catálogo de especialidades, revisa el rendimiento del centro y supervisa las atenciones.</p>
+    </div>
+    <div class="user-badge badge-admin" *ngIf="yo">
+      <span class="avatar avatar-admin">🛡️</span>
+      <span>
+        <strong>{{ yo.nombre }}</strong>
+        <small>{{ yo.roles.join(', ') || 'Administrador' }}</small>
+      </span>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="exitoMensaje" class="alert-banner alert-success">
+  <span>{{ exitoMensaje }}</span>
+  <button type="button" class="alert-close" (click)="exitoMensaje = ''">&times;</button>
+</div>
+<div *ngIf="errorMensaje" class="alert-banner alert-error">
+  <span>{{ errorMensaje }}</span>
+  <button type="button" class="alert-close" (click)="errorMensaje = ''">&times;</button>
+</div>
+
+<div class="admin-tabs">
+  <button
+    type="button"
+    class="admin-tab-btn"
+    [class.admin-tab-active]="tabActiva === 'catalogo'"
+    (click)="tabActiva = 'catalogo'"
+  >
+    <span class="admin-tab-icon" aria-hidden="true">🗂️</span> Gestión de Especialidades y Precios
+  </button>
+  <button
+    type="button"
+    class="admin-tab-btn"
+    [class.admin-tab-active]="tabActiva === 'metricas'"
+    (click)="tabActiva = 'metricas'"
+  >
+    <span class="admin-tab-icon" aria-hidden="true">📊</span> Métricas y Rendimiento Clínico
+  </button>
+  <button
+    type="button"
+    class="admin-tab-btn"
+    [class.admin-tab-active]="tabActiva === 'supervision'"
+    (click)="tabActiva = 'supervision'"
+  >
+    <span class="admin-tab-icon" aria-hidden="true">🔎</span> Supervisión de Atenciones
+  </button>
+</div>
+
+<!-- ================= TAB 1: Gestión de Especialidades y Precios ================= -->
+<section class="table-panel" *ngIf="tabActiva === 'catalogo'">
+  <div class="panel-header admin-panel-header">
+    <div>
+      <h2>Prestaciones Médicas del Centro</h2>
+      <p>Administra precios, box asignado y cupos disponibles de cada especialidad.</p>
+    </div>
+    <button type="button" class="button button-primary btn-header-action" (click)="abrirModalCrear()">
+      + Nueva Especialidad
+    </button>
+  </div>
+
+  <div class="table-wrap" *ngIf="catalogo.length > 0; else sinCatalogo">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre de la Especialidad</th>
+          <th>Precio Actual</th>
+          <th>Box Asignado</th>
+          <th>Cupos Disponibles</th>
+          <th class="th-actions">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of catalogo">
+          <td class="id-cell">#{{ s.id }}</td>
+          <td><strong>{{ s.nombre }}</strong></td>
+          <td>{{ formatearPrecio(s.precio) }}</td>
+          <td>Box {{ s.boxId || '—' }}</td>
+          <td>{{ s.cuposDisponibles }}</td>
+          <td class="td-actions">
+            <button type="button" class="btn-op btn-op-step" (click)="abrirModalEditar(s)">Editar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #sinCatalogo>
+    <div class="empty-state">
+      <span class="empty-icon">🗂️</span>
+      <h3>Aún no hay especialidades registradas</h3>
+      <p>Usa "+ Nueva Especialidad" para comenzar a construir el catálogo clínico.</p>
+    </div>
+  </ng-template>
+</section>
+
+<!-- ================= TAB 2: Métricas y Rendimiento Clínico ================= -->
+<ng-container *ngIf="tabActiva === 'metricas'">
+  <section class="stats-row">
+    <article class="stat-card stat-card-accent">
+      <span>Recaudación estimada</span>
+      <strong>{{ formatearPrecio(recaudacionEstimada) }}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Especialidades activas</span>
+      <strong>{{ totalEspecialidadesActivas }}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Especialidad más demandada</span>
+      <strong class="stat-text">{{ especialidadMasDemandada }}</strong>
+    </article>
+  </section>
+
+  <section class="stats-row stats-row-half">
+    <article class="stat-card stat-card-warning">
+      <span>Atenciones realizadas</span>
+      <strong>{{ atencionesRealizadas }}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Atenciones canceladas</span>
+      <strong>{{ atencionesCanceladas }}</strong>
+    </article>
+  </section>
+
+  <div class="charts-grid">
+    <section class="chart-panel">
+      <h3>Citas por Especialidad</h3>
+      <div class="chart-bars" *ngIf="citasPorEspecialidad.length > 0; else sinCitasEspecialidad">
+        <div class="chart-row" *ngFor="let item of citasPorEspecialidad">
+          <span class="chart-label">{{ item.nombre }}</span>
+          <div class="chart-bar-track">
+            <div class="chart-bar-fill chart-bar-especialidad" [style.width.%]="item.porcentaje"></div>
+          </div>
+          <span class="chart-value">{{ item.cantidad }}</span>
+        </div>
+      </div>
+      <ng-template #sinCitasEspecialidad>
+        <p class="empty-chart">Aún no hay citas registradas.</p>
+      </ng-template>
+    </section>
+
+    <section class="chart-panel">
+      <h3>Citas por Estado</h3>
+      <div class="chart-bars">
+        <div class="chart-row" *ngFor="let item of citasPorEstado">
+          <span class="chart-label">{{ item.etiqueta }}</span>
+          <div class="chart-bar-track">
+            <div class="chart-bar-fill" [ngClass]="'chart-bar-' + item.estado.toLowerCase()" [style.width.%]="item.porcentaje"></div>
+          </div>
+          <span class="chart-value">{{ item.cantidad }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</ng-container>
+
+<!-- ================= TAB 3: Supervisión de Atenciones ================= -->
+<section class="table-panel" *ngIf="tabActiva === 'supervision'">
+  <div class="panel-header admin-panel-header">
+    <div>
+      <h2>Supervisión de Atenciones</h2>
+      <p>Vista de auditoría de todas las citas registradas en la clínica.</p>
+    </div>
+    <div class="admin-filters">
+      <input
+        type="text"
+        class="search-input"
+        [(ngModel)]="terminoBusquedaSupervision"
+        placeholder="Buscar por paciente o ID..."
+      />
+    </div>
+  </div>
+
+  <div class="status-tabs">
+    <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'TODAS'" (click)="filtroEstadoSupervision = 'TODAS'">
+      Todas ({{ atenciones.length }})
+    </button>
+    <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'SOLICITADA'" (click)="filtroEstadoSupervision = 'SOLICITADA'">
+      Solicitadas ({{ countPorEstado('SOLICITADA') }})
+    </button>
+    <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'CONFIRMADA'" (click)="filtroEstadoSupervision = 'CONFIRMADA'">
+      Confirmadas ({{ countPorEstado('CONFIRMADA') }})
+    </button>
+    <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'EN_ESPERA'" (click)="filtroEstadoSupervision = 'EN_ESPERA'">
+      En Espera ({{ countPorEstado('EN_ESPERA') }})
+    </button>
+    <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'EN_ATENCION'" (click)="filtroEstadoSupervision = 'EN_ATENCION'">
+      En Consulta ({{ countPorEstado('EN_ATENCION') }})
+    </button>
+    <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'CERRADA'" (click)="filtroEstadoSupervision = 'CERRADA'">
+      Cerradas ({{ countPorEstado('CERRADA') }})
+    </button>
+    <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'CANCELADA'" (click)="filtroEstadoSupervision = 'CANCELADA'">
+      Canceladas ({{ countPorEstado('CANCELADA') }})
+    </button>
+  </div>
+
+  <div class="table-wrap" *ngIf="atencionesFiltradasSupervision.length > 0; else sinSupervision">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Paciente</th>
+          <th>Servicio / Prestación</th>
+          <th>Cita Agendada Para</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of atencionesFiltradasSupervision">
+          <td class="id-cell">#{{ a.id }}</td>
+          <td><strong>{{ a.pacienteNombre }}</strong></td>
+          <td>
+            {{ getServicioNombre(a.servicioId) }}
+            <small class="text-subtle d-block" *ngIf="a.boxId">Box {{ a.boxId }}</small>
+          </td>
+          <td>{{ formatearFechaHoraCita(a.fechaHora) }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="'badge-' + a.estado.toLowerCase()">{{ a.estado }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #sinSupervision>
+    <div class="empty-state">
+      <span class="empty-icon">&#10003;</span>
+      <h3>No se encontraron atenciones</h3>
+      <p>No hay solicitudes que coincidan con el filtro actual o la búsqueda ingresada.</p>
+    </div>
+  </ng-template>
+</section>
+
+<!-- ================= Modal: Nueva Especialidad / Editar Especialidad ================= -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoFormulario === 'crear' ? '+ Nueva Especialidad' : 'Editar Especialidad' }}</h3>
+      <button type="button" class="alert-close" (click)="cerrarModal()">&times;</button>
+    </div>
+
+    <form (ngSubmit)="guardarServicio()" class="booking-form">
+      <div class="form-grid">
+        <div class="form-group form-group-full">
+          <label for="formNombre">Nombre de la prestación</label>
+          <input
+            id="formNombre"
+            type="text"
+            class="form-control"
+            [(ngModel)]="formNombre"
+            name="formNombre"
+            placeholder="Ej: Pediatría, Kinesiología"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="formPrecio">Precio de la consulta (CLP)</label>
+          <input
+            id="formPrecio"
+            type="number"
+            class="form-control"
+            [(ngModel)]="formPrecio"
+            name="formPrecio"
+            min="0"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="formBoxId">Box asignado</label>
+          <input
+            id="formBoxId"
+            type="number"
+            class="form-control"
+            [(ngModel)]="formBoxId"
+            name="formBoxId"
+            min="1"
+            placeholder="Ej: 1"
+          />
+        </div>
+
+        <div class="form-group form-group-full">
+          <label for="formCupos">Cupos disponibles</label>
+          <input
+            id="formCupos"
+            type="number"
+            class="form-control"
+            [(ngModel)]="formCupos"
+            name="formCupos"
+            min="0"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="button-quiet" (click)="cerrarModal()">Cancelar</button>
+        <button type="submit" class="button button-primary btn-header-action" [disabled]="guardandoServicio">
+          <span *ngIf="guardandoServicio" class="spinner"></span>
+          {{ guardandoServicio ? 'Guardando...' : (modoFormulario === 'crear' ? 'Registrar Especialidad' : 'Guardar Cambios') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
