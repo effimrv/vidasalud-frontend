@@ -39,5 +39,21 @@ export const ESPECIALIDADES: EspecialidadDestacada[] = [
     precio: '$28.000',
     box: 'Box 4',
     icono: '❤️'
+  },
+  {
+    slug: 'dermatologia',
+    nombre: 'Dermatología',
+    descripcion: 'Diagnóstico y tratamiento de afecciones de la piel, control de lunares y salud dermatológica.',
+    precio: '$20.000',
+    box: 'Box 5',
+    icono: '🧴'
+  },
+  {
+    slug: 'ginecologia',
+    nombre: 'Ginecología y Salud de la Mujer',
+    descripcion: 'Controles ginecológicos preventivos, salud reproductiva y seguimiento integral de la mujer.',
+    precio: '$25.000',
+    box: 'Box 6',
+    icono: '🌸'
   }
 ];

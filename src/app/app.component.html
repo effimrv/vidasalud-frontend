@@ -38,7 +38,7 @@
       <a class="button button-cta-nav" routerLink="appointments">
         <span aria-hidden="true">📅</span> {{ esAdmin ? 'Panel Operativo' : 'Mis Atenciones' }}
       </a>
-      <button class="button button-quiet" (click)="logout()">Cerrar sesión</button>
+      <button class="button button-nav-quiet" (click)="logout()">Cerrar sesión</button>
     </ng-container>
     <ng-template #noLog>
       <button class="button button-cta-nav" (click)="login()">
@@ -50,30 +50,6 @@
 
 <nav class="mega-nav" #megaNav>
   <div class="mega-nav-inner">
-    <div class="mega-item" [class.open]="menuAbierto === 'servicios'">
-      <button type="button" class="mega-trigger" (click)="toggleMenu('servicios')">
-        Servicios en línea <span class="chev" aria-hidden="true">⌄</span>
-      </button>
-      <div class="mega-panel" *ngIf="menuAbierto === 'servicios'">
-        <a class="mega-link" routerLink="appointments" (click)="cerrarMenu()">
-          <span class="mega-link-icon" aria-hidden="true">📅</span>
-          <span class="mega-link-text"><strong>Agendar hora</strong><small>Reserva tu próxima consulta</small></span>
-        </a>
-        <a class="mega-link" routerLink="appointments" (click)="cerrarMenu()">
-          <span class="mega-link-icon" aria-hidden="true">🗂️</span>
-          <span class="mega-link-text"><strong>Mis atenciones</strong><small>Revisa el estado de tus citas</small></span>
-        </a>
-        <a class="mega-link" routerLink="appointments" (click)="cerrarMenu()">
-          <span class="mega-link-icon" aria-hidden="true">✖️</span>
-          <span class="mega-link-text"><strong>Anular una hora</strong><small>Cancela una reserva vigente</small></span>
-        </a>
-        <a class="mega-link" routerLink="/" fragment="especialidades" (click)="cerrarMenu()">
-          <span class="mega-link-icon" aria-hidden="true">📋</span>
-          <span class="mega-link-text"><strong>Catálogo de especialidades</strong><small>Conoce valores y boxes disponibles</small></span>
-        </a>
-      </div>
-    </div>
-
     <div class="mega-item" [class.open]="menuAbierto === 'especialidades'">
       <button type="button" class="mega-trigger" (click)="toggleMenu('especialidades')">
         Especialidades y servicios <span class="chev" aria-hidden="true">⌄</span>

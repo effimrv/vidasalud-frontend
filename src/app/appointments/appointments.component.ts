@@ -8,28 +8,6 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <!-- Barra superior de contexto y alternancia de vista para pruebas -->
-    <div class="view-switcher-bar">
-      <div class="view-tag">
-        <span class="role-pill" [ngClass]="modoActivo === 'admin' ? 'pill-admin' : 'pill-paciente'">
-          {{ modoActivo === 'admin' ? '🛡️ Vista Gestión / Administrador' : '👤 Vista Portal del Paciente' }}
-        </span>
-        <small class="role-caption">Detectado según perfil: {{ yo?.roles?.[0] || 'Paciente' }}</small>
-      </div>
-      <div class="switcher-buttons">
-        <span class="switcher-label">Simular vista:</span>
-        <button type="button" class="btn-toggle" [class.btn-toggle-active]="vistaModo === 'auto'" (click)="vistaModo = 'auto'">
-          Automática
-        </button>
-        <button type="button" class="btn-toggle" [class.btn-toggle-active]="vistaModo === 'paciente'" (click)="vistaModo = 'paciente'">
-          Paciente
-        </button>
-        <button type="button" class="btn-toggle" [class.btn-toggle-active]="vistaModo === 'admin'" (click)="vistaModo = 'admin'">
-          Administrador
-        </button>
-      </div>
-    </div>
-
     <!-- Mensajes de Alerta -->
     <div *ngIf="exitoMensaje" class="alert-banner alert-success">
       <span>{{ exitoMensaje }}</span>
@@ -45,18 +23,20 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
     <!-- ========================================================================= -->
     <ng-container *ngIf="modoActivo === 'paciente'">
       <!-- Cabecera amigable del paciente -->
-      <section class="page-heading">
-        <div>
-          <span class="eyebrow">PORTAL DEL PACIENTE · VIDA SALUD</span>
-          <h1>Mis Citas y Atenciones</h1>
-          <p>Revisa el estado de tus solicitudes médicas o agenda una nueva cita en línea.</p>
-        </div>
-        <div class="user-badge" *ngIf="yo">
-          <span class="avatar">{{ yo.nombre ? yo.nombre.charAt(0).toUpperCase() : 'U' }}</span>
-          <span>
-            <strong>{{ yo.nombre }}</strong>
-            <small>Paciente registrado</small>
-          </span>
+      <section class="dashboard-hero">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">PORTAL DEL PACIENTE · VIDA SALUD</span>
+            <h1>Mis Citas y Atenciones</h1>
+            <p>Revisa el estado de tus solicitudes médicas o agenda una nueva cita en línea.</p>
+          </div>
+          <div class="user-badge" *ngIf="yo">
+            <span class="avatar">{{ yo.nombre ? yo.nombre.charAt(0).toUpperCase() : 'U' }}</span>
+            <span>
+              <strong>{{ yo.nombre }}</strong>
+              <small>Paciente registrado</small>
+            </span>
+          </div>
         </div>
       </section>
 
@@ -226,18 +206,20 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
     <!-- 2. VISTA DE ADMINISTRADOR / RECEPCIONISTA (PANEL OPERATIVO)               -->
     <!-- ========================================================================= -->
     <ng-container *ngIf="modoActivo === 'admin'">
-      <section class="page-heading">
-        <div>
-          <span class="eyebrow">PANEL OPERATIVO · GESTIÓN CLÍNICA</span>
-          <h1>Control de Atenciones</h1>
-          <p>Supervisa las solicitudes de todos los pacientes, gestiona estados y asignación médica.</p>
-        </div>
-        <div class="user-badge badge-admin" *ngIf="yo">
-          <span class="avatar avatar-admin">🛡️</span>
-          <span>
-            <strong>{{ yo.nombre }}</strong>
-            <small>{{ yo.roles.join(', ') || 'Administrador' }}</small>
-          </span>
+      <section class="dashboard-hero dashboard-hero-admin">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">PANEL OPERATIVO · GESTIÓN CLÍNICA</span>
+            <h1>Control de Atenciones</h1>
+            <p>Supervisa las solicitudes de todos los pacientes, gestiona estados y asignación médica.</p>
+          </div>
+          <div class="user-badge badge-admin" *ngIf="yo">
+            <span class="avatar avatar-admin">🛡️</span>
+            <span>
+              <strong>{{ yo.nombre }}</strong>
+              <small>{{ yo.roles.join(', ') || 'Administrador' }}</small>
+            </span>
+          </div>
         </div>
       </section>
 
@@ -266,7 +248,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
         <div class="panel-header admin-panel-header">
           <div>
             <h2>Todas las Solicitudes Clínicas</h2>
-            <p>Lista general de pacientes y actualización de estados en tiempo real</p>
+            <p>Lista general de pacientes y actualización de estados en tiempo real · Actualizado {{ ultimaActualizacion }}</p>
           </div>
           <div class="admin-filters">
             <input
@@ -275,6 +257,10 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
               [(ngModel)]="terminoBusqueda"
               placeholder="Buscar por paciente o ID..."
             />
+            <button type="button" class="button-quiet btn-refresh" (click)="recargarAtenciones()" [disabled]="actualizando">
+              <span [class.spin]="actualizando" aria-hidden="true">⟳</span>
+              {{ actualizando ? 'Actualizando…' : 'Actualizar' }}
+            </button>
           </div>
         </div>
 
@@ -359,6 +345,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
                   </span>
                 </td>
                 <td class="td-actions">
+                  <div class="td-actions-inner">
                   <!-- Transición SOLICITADA -> CONFIRMADA o CANCELADA -->
                   <ng-container *ngIf="a.estado === 'SOLICITADA'">
                     <button
@@ -435,6 +422,7 @@ import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.se
                   <span *ngIf="a.estado === 'CERRADA' || a.estado === 'CANCELADA'" class="text-subtle">
                     Sin acciones pendientes
                   </span>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -456,9 +444,8 @@ export class AppointmentsComponent implements OnInit {
   atenciones: Appointment[] = [];
   catalogo: ClinicalService[] = [];
   yo: UserProfile | null = null;
-
-  // Modo de vista ('auto', 'paciente', 'admin')
-  vistaModo: 'auto' | 'paciente' | 'admin' = 'auto';
+  actualizando: boolean = false;
+  ultimaActualizacion: string = 'hace instantes';
 
   // Formulario de nueva cita
   nuevoPacienteNombre: string = '';
@@ -505,11 +492,17 @@ export class AppointmentsComponent implements OnInit {
   }
 
   recargarAtenciones(): void {
+    this.actualizando = true;
     this.api.getAppointments().subscribe({
-      next: r => this.atenciones = r || [],
+      next: r => {
+        this.atenciones = r || [];
+        this.actualizando = false;
+        this.ultimaActualizacion = 'hace instantes';
+      },
       error: err => {
         console.warn('Error al cargar atenciones:', err);
         this.errorMensaje = 'No se pudieron cargar las atenciones. Revisa tu conexión o sesión.';
+        this.actualizando = false;
       }
     });
   }
@@ -519,9 +512,6 @@ export class AppointmentsComponent implements OnInit {
   }
 
   get modoActivo(): 'paciente' | 'admin' {
-    if (this.vistaModo !== 'auto') {
-      return this.vistaModo;
-    }
     return this.esAdmin ? 'admin' : 'paciente';
   }
 
