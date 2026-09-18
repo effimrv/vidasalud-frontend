@@ -35,8 +35,8 @@
           {{ etiquetaRol }}
         </span>
       </span>
-      <a class="button button-cta-nav" routerLink="appointments">
-        <span aria-hidden="true">📅</span> {{ esAdmin ? 'Panel Operativo' : 'Mis Atenciones' }}
+      <a class="button button-cta-nav" *ngIf="!esAdmin" routerLink="appointments">
+        <span aria-hidden="true">📅</span> Mis Atenciones
       </a>
       <button class="button button-nav-quiet" (click)="logout()">Cerrar sesión</button>
     </ng-container>
