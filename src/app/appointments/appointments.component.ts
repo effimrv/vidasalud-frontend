@@ -203,6 +203,11 @@ export class AppointmentsComponent implements OnInit {
     return especialidad?.descripcion ?? 'Atención médica especializada en esta prestación.';
   }
 
+  getImagenServicio(nombre: string): string | null {
+    const especialidad = ESPECIALIDADES.find(e => e.nombre === nombre);
+    return especialidad?.imagen ?? null;
+  }
+
   getEstadoLegible(estado: string): string {
     switch (estado) {
       case 'SOLICITADA': return 'Solicitud en Revisión';

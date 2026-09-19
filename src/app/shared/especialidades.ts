@@ -5,6 +5,7 @@ export interface EspecialidadDestacada {
   precio: string;
   box: string;
   icono: string;
+  imagen: string;
 }
 
 export const ESPECIALIDADES: EspecialidadDestacada[] = [
@@ -14,7 +15,8 @@ export const ESPECIALIDADES: EspecialidadDestacada[] = [
     descripcion: 'Evaluación clínica integral, diagnósticos preventivos y tratamiento de patologías frecuentes.',
     precio: '$15.000',
     box: 'Box 1',
-    icono: '🩺'
+    icono: '🩺',
+    imagen: 'img-esp-medicina-general.webp'
   },
   {
     slug: 'pediatria',
@@ -22,7 +24,8 @@ export const ESPECIALIDADES: EspecialidadDestacada[] = [
     descripcion: 'Atención especializada para recién nacidos, niños y adolescentes con enfoque preventivo.',
     precio: '$22.000',
     box: 'Box 2',
-    icono: '👶'
+    icono: '👶',
+    imagen: 'img-esp-pediatria.webp'
   },
   {
     slug: 'kinesiologia',
@@ -30,7 +33,8 @@ export const ESPECIALIDADES: EspecialidadDestacada[] = [
     descripcion: 'Recuperación funcional motora, terapia respiratoria y tratamiento músculo-esquelético.',
     precio: '$18.000',
     box: 'Box 3',
-    icono: '🏃'
+    icono: '🏃',
+    imagen: 'img-esp-kinesiologia.jpg'
   },
   {
     slug: 'cardiologia',
@@ -38,7 +42,8 @@ export const ESPECIALIDADES: EspecialidadDestacada[] = [
     descripcion: 'Chequeos cardiovasculares, control de hipertensión y evaluaciones médicas de esfuerzo.',
     precio: '$28.000',
     box: 'Box 4',
-    icono: '❤️'
+    icono: '❤️',
+    imagen: 'img-esp-cardiologia.jpg'
   },
   {
     slug: 'dermatologia',
@@ -46,7 +51,8 @@ export const ESPECIALIDADES: EspecialidadDestacada[] = [
     descripcion: 'Diagnóstico y tratamiento de afecciones de la piel, control de lunares y salud dermatológica.',
     precio: '$20.000',
     box: 'Box 5',
-    icono: '🧴'
+    icono: '🧴',
+    imagen: 'img-esp-dermatologia.jpg'
   },
   {
     slug: 'ginecologia',
@@ -54,6 +60,7 @@ export const ESPECIALIDADES: EspecialidadDestacada[] = [
     descripcion: 'Controles ginecológicos preventivos, salud reproductiva y seguimiento integral de la mujer.',
     precio: '$25.000',
     box: 'Box 6',
-    icono: '🌸'
+    icono: '🌸',
+    imagen: 'img-esp-ginecologia.png'
   }
 ];

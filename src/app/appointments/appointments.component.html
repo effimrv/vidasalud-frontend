@@ -280,7 +280,8 @@
     </div>
     <div class="catalog-grid">
       <article class="service-card" *ngFor="let serv of catalogo">
-        <div class="service-card-head">
+        <img *ngIf="getImagenServicio(serv.nombre) as img" [src]="img" [alt]="serv.nombre" class="service-card-img" loading="lazy" />
+        <div class="service-card-head" *ngIf="!getImagenServicio(serv.nombre)">
           <span class="service-icon">⚕️</span>
         </div>
         <h3>{{ serv.nombre }}</h3>
