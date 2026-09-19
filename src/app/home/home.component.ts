@@ -160,7 +160,7 @@ import { ApiService, InstitutionalInfo } from '../api.service';
 
       <div class="specialties-grid">
         <article class="spec-card reveal" *ngFor="let esp of especialidades" [id]="esp.slug">
-          <div class="spec-icon-wrap">{{ esp.icono }}</div>
+          <img [src]="esp.imagen" [alt]="esp.nombre" class="spec-card-img" loading="lazy" />
           <div class="spec-info">
             <div class="spec-top">
               <h3>{{ esp.nombre }}</h3>
