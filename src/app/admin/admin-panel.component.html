@@ -49,6 +49,14 @@
   >
     <span class="admin-tab-icon" aria-hidden="true">🔎</span> Supervisión de Atenciones
   </button>
+  <button
+    type="button"
+    class="admin-tab-btn"
+    [class.admin-tab-active]="tabActiva === 'info'"
+    (click)="tabActiva = 'info'"
+  >
+    <span class="admin-tab-icon" aria-hidden="true">ℹ️</span> Información del Centro
+  </button>
 </div>
 
 <!-- ================= TAB 1: Gestión de Especialidades y Precios ================= -->
@@ -235,6 +243,71 @@
       <p>No hay solicitudes que coincidan con el filtro actual o la búsqueda ingresada.</p>
     </div>
   </ng-template>
+</section>
+
+<!-- ================= TAB 4: Información del Centro ================= -->
+<section class="table-panel" *ngIf="tabActiva === 'info' && formInfo">
+  <div class="panel-header">
+    <div>
+      <h2>Información de VidaSalud</h2>
+      <p>Este contenido se muestra públicamente en la página de inicio y en el portal del paciente.</p>
+    </div>
+  </div>
+
+  <form (ngSubmit)="guardarInfo()" class="booking-form info-form">
+    <div class="form-grid">
+      <div class="form-group form-group-full">
+        <label for="infoTitulo">Título de la sección</label>
+        <input
+          id="infoTitulo"
+          type="text"
+          class="form-control"
+          [(ngModel)]="formInfo.titulo"
+          name="infoTitulo"
+          required
+        />
+      </div>
+
+      <div class="form-group form-group-full">
+        <label for="infoDescripcion">Descripción</label>
+        <textarea
+          id="infoDescripcion"
+          class="form-control"
+          rows="5"
+          [(ngModel)]="formInfo.descripcion"
+          name="infoDescripcion"
+          required
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="infoDireccion">Dirección</label>
+        <input id="infoDireccion" type="text" class="form-control" [(ngModel)]="formInfo.direccion" name="infoDireccion" />
+      </div>
+
+      <div class="form-group">
+        <label for="infoHorario">Horario de atención</label>
+        <input id="infoHorario" type="text" class="form-control" [(ngModel)]="formInfo.horario" name="infoHorario" />
+      </div>
+
+      <div class="form-group">
+        <label for="infoTelefono">Teléfono</label>
+        <input id="infoTelefono" type="text" class="form-control" [(ngModel)]="formInfo.telefono" name="infoTelefono" />
+      </div>
+
+      <div class="form-group">
+        <label for="infoEmail">Email</label>
+        <input id="infoEmail" type="email" class="form-control" [(ngModel)]="formInfo.email" name="infoEmail" />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="button button-primary btn-header-action" [disabled]="guardandoInfo">
+        <span *ngIf="guardandoInfo" class="spinner"></span>
+        {{ guardandoInfo ? 'Guardando...' : 'Guardar Cambios' }}
+      </button>
+    </div>
+  </form>
 </section>
 
 <!-- ================= Modal: Nueva Especialidad / Editar Especialidad ================= -->

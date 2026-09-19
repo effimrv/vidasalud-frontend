@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.service';
+import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
 import { AdminPanelComponent } from '../admin/admin-panel.component';
 import { ESPECIALIDADES } from '../shared/especialidades';
 
@@ -15,6 +15,7 @@ export class AppointmentsComponent implements OnInit {
   atenciones: Appointment[] = [];
   catalogo: ClinicalService[] = [];
   yo: UserProfile | null = null;
+  infoInstitucional: InstitutionalInfo | null = null;
   actualizando: boolean = false;
   ultimaActualizacion: string = 'hace instantes';
 
@@ -72,6 +73,11 @@ export class AppointmentsComponent implements OnInit {
         }
       },
       error: err => console.warn('No se pudo cargar el catálogo:', err)
+    });
+
+    this.api.getInfoInstitucional().subscribe({
+      next: info => this.infoInstitucional = info,
+      error: err => console.warn('No se pudo cargar la información institucional:', err)
     });
 
     this.recargarAtenciones();

@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, ViewportScroller } from '@angular/common';
 import { MsalService } from '@azure/msal-angular';
 import { ESPECIALIDADES } from './shared/especialidades';
 
@@ -18,9 +18,13 @@ export class AppComponent implements OnInit {
   modoOscuro = false;
   mostrarConfirmacionLogout = false;
 
-  constructor(private msal: MsalService, private router: Router) {}
+  constructor(private msal: MsalService, private router: Router, private viewportScroller: ViewportScroller) {}
 
   ngOnInit(): void {
+    // Compensa el header fijo (topbar + mega-nav) al hacer scroll a un ancla, ya que Angular
+    // calcula la posición manualmente y no respeta scroll-margin-top del CSS.
+    this.viewportScroller.setOffset([0, 150]);
+
     this.msal.instance.handleRedirectPromise().then(result => {
       if (result?.account) {
         this.msal.instance.setActiveAccount(result.account);

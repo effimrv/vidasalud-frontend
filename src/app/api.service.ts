@@ -29,6 +29,15 @@ export interface ClinicalService {
   cuposDisponibles: number;
 }
 
+export interface InstitutionalInfo {
+  titulo: string;
+  descripcion: string;
+  telefono: string;
+  email: string;
+  horario: string;
+  direccion: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private base = 'https://dzv5td4m80.execute-api.us-east-1.amazonaws.com';
@@ -99,6 +108,17 @@ export class ApiService {
   getMe(): Observable<UserProfile> {
     return this.getHeaders().pipe(
       switchMap(headers => this.http.get<UserProfile>(`${this.base}/api/me`, { headers }))
+    );
+  }
+
+  /** Información institucional del centro: lectura pública, sin requerir sesión activa. */
+  getInfoInstitucional(): Observable<InstitutionalInfo> {
+    return this.http.get<InstitutionalInfo>(`${this.base}/api/info`);
+  }
+
+  actualizarInfoInstitucional(data: Partial<InstitutionalInfo>): Observable<InstitutionalInfo> {
+    return this.getHeaders().pipe(
+      switchMap(headers => this.http.put<InstitutionalInfo>(`${this.base}/api/info`, data, { headers }))
     );
   }
 }

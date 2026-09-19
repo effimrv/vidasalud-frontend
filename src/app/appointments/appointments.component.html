@@ -294,6 +294,35 @@
       </article>
     </div>
   </section>
+
+  <!-- Información de VidaSalud (editable por el Admin) -->
+  <section class="info-section" *ngIf="infoInstitucional">
+    <div class="section-title-wrap">
+      <span class="eyebrow">QUIÉNES SOMOS</span>
+      <h2>{{ infoInstitucional.titulo }}</h2>
+    </div>
+    <div class="info-card">
+      <p class="info-desc">{{ infoInstitucional.descripcion }}</p>
+      <div class="info-details">
+        <div class="info-detail-item">
+          <strong>📍 Dirección</strong>
+          <span>{{ infoInstitucional.direccion }}</span>
+        </div>
+        <div class="info-detail-item">
+          <strong>🕒 Horario</strong>
+          <span>{{ infoInstitucional.horario }}</span>
+        </div>
+        <div class="info-detail-item">
+          <strong>☎️ Teléfono</strong>
+          <span>{{ infoInstitucional.telefono }}</span>
+        </div>
+        <div class="info-detail-item">
+          <strong>✉️ Email</strong>
+          <span>{{ infoInstitucional.email }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
 </ng-container>
 
 <!-- ========================================================================= -->

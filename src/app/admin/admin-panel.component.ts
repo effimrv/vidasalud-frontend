@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService, Appointment, ClinicalService, UserProfile } from '../api.service';
+import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
 
 @Component({
   selector: 'app-admin-panel',
@@ -13,9 +13,13 @@ export class AdminPanelComponent implements OnInit {
   @Input() atenciones: Appointment[] = [];
   @Input() yo: UserProfile | null = null;
 
-  tabActiva: 'catalogo' | 'metricas' | 'supervision' = 'catalogo';
+  tabActiva: 'catalogo' | 'metricas' | 'supervision' | 'info' = 'catalogo';
 
   catalogo: ClinicalService[] = [];
+
+  // Información del Centro
+  formInfo: InstitutionalInfo | null = null;
+  guardandoInfo = false;
 
   // Modal de especialidad
   modalAbierto = false;
@@ -38,12 +42,39 @@ export class AdminPanelComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarCatalogo();
+    this.cargarInfo();
   }
 
   cargarCatalogo(): void {
     this.api.getCatalog().subscribe({
       next: list => { this.catalogo = list || []; },
       error: () => { this.errorMensaje = 'No se pudo cargar el catálogo de prestaciones.'; }
+    });
+  }
+
+  cargarInfo(): void {
+    this.api.getInfoInstitucional().subscribe({
+      next: info => { this.formInfo = info; },
+      error: () => { this.errorMensaje = 'No se pudo cargar la información del centro.'; }
+    });
+  }
+
+  guardarInfo(): void {
+    if (!this.formInfo) return;
+    this.guardandoInfo = true;
+    this.errorMensaje = '';
+    this.exitoMensaje = '';
+
+    this.api.actualizarInfoInstitucional(this.formInfo).subscribe({
+      next: info => {
+        this.formInfo = info;
+        this.guardandoInfo = false;
+        this.exitoMensaje = 'Información del centro actualizada con éxito.';
+      },
+      error: () => {
+        this.guardandoInfo = false;
+        this.errorMensaje = 'Ocurrió un error al guardar la información del centro.';
+      }
     });
   }
 

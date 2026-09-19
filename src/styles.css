@@ -186,6 +186,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Animaciones al hacer scroll (Reveal) */
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.2, .7, .3, 1), transform .7s cubic-bezier(.2, .7, .3, 1); will-change: opacity, transform; }
+/* Las tarjetas de especialidad son destino de scroll por anclas (buscador, mega-menú): sin desplazamiento vertical para que el scroll-margin-top calce con su posición final. */
+.spec-card.reveal { transform: none; }
 .reveal.in-view { opacity: 1; transform: translateY(0); }
 .feature-grid .reveal:nth-child(2) { transition-delay: .1s; }
 .feature-grid .reveal:nth-child(3) { transition-delay: .2s; }
@@ -244,6 +246,15 @@ html { scroll-behavior: smooth; }
 .button-hero-login-sm:hover { background: #f2fbfa; transform: translateY(-2px); }
 
 /* Footer Institucional */
+/* Información de VidaSalud (Home / Paciente): editable por el Admin */
+.info-section { margin-top: 54px; }
+.info-card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 28px 32px; }
+.info-desc { margin: 0 0 22px; color: var(--ink); font-size: 15px; line-height: 1.7; }
+.info-details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+.info-detail-item { display: flex; flex-direction: column; gap: 4px; }
+.info-detail-item strong { font-size: 13px; color: var(--heading); }
+.info-detail-item span { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
 .clinic-footer { margin-top: 64px; padding-top: 36px; border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; }
 .footer-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-bottom: 28px; }
 .brand-footer { color: var(--heading); }
@@ -315,7 +326,8 @@ html { scroll-behavior: smooth; }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label { font-size: 13px; font-weight: 600; color: var(--ink); }
 .form-group-full { grid-column: 1 / -1; }
-.form-control { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; color: var(--ink); background: var(--white); transition: border-color .15s ease; }
+.form-control { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; font-family: inherit; color: var(--ink); background: var(--white); transition: border-color .15s ease; }
+textarea.form-control { resize: vertical; line-height: 1.5; }
 .form-control:focus { outline: none; border-color: var(--teal); }
 .form-control-readonly { background: var(--surface-alt); color: var(--muted); cursor: not-allowed; }
 .form-control-readonly:focus { border-color: var(--line); }
@@ -533,6 +545,7 @@ body.dark-mode a:focus-visible, body.dark-mode button:focus-visible, body.dark-m
 	.stats-admin { grid-template-columns: repeat(2, 1fr); }
 	.catalog-grid { grid-template-columns: repeat(2, 1fr); }
 	.specialties-grid { grid-template-columns: 1fr; }
+	.info-details { grid-template-columns: repeat(2, 1fr); }
 	.form-grid { grid-template-columns: 1fr; }
 	.hero-visual { width: 260px; }
 	.hero-badge-card { right: -6px; }
@@ -556,7 +569,7 @@ body.dark-mode a:focus-visible, body.dark-mode button:focus-visible, body.dark-m
 	.hero-visual { width: 100%; margin-top: 20px; }
 	.hero-badge-card { display: none; }
 	.quick-access-wrap { width: 92vw; margin-top: 16px; }
-	.feature-grid, .stats-row, .catalog-grid, .specialties-grid, .charts-grid { grid-template-columns: 1fr; }
+	.feature-grid, .stats-row, .catalog-grid, .specialties-grid, .charts-grid, .info-details { grid-template-columns: 1fr; }
 	.chart-row { grid-template-columns: 96px 1fr 28px; gap: 8px; }
 	.page-heading { align-items: start; flex-direction: column; gap: 18px; }
 	.page-heading h1 { font-size: 32px; }

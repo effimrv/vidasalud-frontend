@@ -1,8 +1,9 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MsalService } from '@azure/msal-angular';
 import { ESPECIALIDADES } from '../shared/especialidades';
+import { ApiService, InstitutionalInfo } from '../api.service';
 
 @Component({
   selector: 'app-home',
@@ -189,6 +190,35 @@ import { ESPECIALIDADES } from '../shared/especialidades';
       </div>
     </section>
 
+    <!-- Sección: Información de VidaSalud (editable por el Admin) -->
+    <section class="info-section" id="quienes-somos" *ngIf="infoInstitucional">
+      <div class="section-title-wrap">
+        <span class="eyebrow">QUIÉNES SOMOS</span>
+        <h2>{{ infoInstitucional.titulo }}</h2>
+      </div>
+      <div class="info-card">
+        <p class="info-desc">{{ infoInstitucional.descripcion }}</p>
+        <div class="info-details">
+          <div class="info-detail-item">
+            <strong>📍 Dirección</strong>
+            <span>{{ infoInstitucional.direccion }}</span>
+          </div>
+          <div class="info-detail-item">
+            <strong>🕒 Horario</strong>
+            <span>{{ infoInstitucional.horario }}</span>
+          </div>
+          <div class="info-detail-item">
+            <strong>☎️ Teléfono</strong>
+            <span>{{ infoInstitucional.telefono }}</span>
+          </div>
+          <div class="info-detail-item">
+            <strong>✉️ Email</strong>
+            <span>{{ infoInstitucional.email }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer Institucional -->
     <footer class="clinic-footer">
       <div class="footer-content">
@@ -220,12 +250,25 @@ import { ESPECIALIDADES } from '../shared/especialidades';
     </footer>
   `
 })
-export class HomeComponent implements AfterViewInit, OnDestroy {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private observer?: IntersectionObserver;
 
   especialidades = ESPECIALIDADES;
+  infoInstitucional: InstitutionalInfo | null = null;
 
-  constructor(private msal: MsalService, private host: ElementRef<HTMLElement>, private route: ActivatedRoute) {}
+  constructor(
+    private msal: MsalService,
+    private host: ElementRef<HTMLElement>,
+    private route: ActivatedRoute,
+    private api: ApiService
+  ) {}
+
+  ngOnInit(): void {
+    this.api.getInfoInstitucional().subscribe({
+      next: info => this.infoInstitucional = info,
+      error: err => console.warn('No se pudo cargar la información institucional:', err)
+    });
+  }
 
   ngAfterViewInit(): void {
     const elementos = this.host.nativeElement.querySelectorAll('.reveal');
