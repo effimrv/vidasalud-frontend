@@ -148,8 +148,33 @@
       <span class="record-count">{{ misAtenciones.length }} citas</span>
     </div>
 
-    <div class="atenciones-list" *ngIf="misAtenciones.length > 0; else sinAtencionesPaciente">
-      <article class="atencion-card" *ngFor="let a of misAtenciones">
+    <!-- Pestañas de Filtro de Estado -->
+    <div class="status-tabs" *ngIf="misAtenciones.length > 0">
+      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'TODAS'" (click)="seleccionarFiltroPaciente('TODAS')">
+        Todas ({{ misAtenciones.length }})
+      </button>
+      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'SOLICITADA'" (click)="seleccionarFiltroPaciente('SOLICITADA')">
+        Solicitadas ({{ countMisAtencionesPorEstado('SOLICITADA') }})
+      </button>
+      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'CONFIRMADA'" (click)="seleccionarFiltroPaciente('CONFIRMADA')">
+        Confirmadas ({{ countMisAtencionesPorEstado('CONFIRMADA') }})
+      </button>
+      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'EN_ESPERA'" (click)="seleccionarFiltroPaciente('EN_ESPERA')">
+        En Espera ({{ countMisAtencionesPorEstado('EN_ESPERA') }})
+      </button>
+      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'EN_ATENCION'" (click)="seleccionarFiltroPaciente('EN_ATENCION')">
+        En Consulta ({{ countMisAtencionesPorEstado('EN_ATENCION') }})
+      </button>
+      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'CERRADA'" (click)="seleccionarFiltroPaciente('CERRADA')">
+        Cerradas ({{ countMisAtencionesPorEstado('CERRADA') }})
+      </button>
+      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'CANCELADA'" (click)="seleccionarFiltroPaciente('CANCELADA')">
+        Canceladas ({{ countMisAtencionesPorEstado('CANCELADA') }})
+      </button>
+    </div>
+
+    <div class="atenciones-list" *ngIf="misAtencionesFiltradas.length > 0; else sinAtencionesPaciente">
+      <article class="atencion-card" *ngFor="let a of misAtencionesVisibles">
         <div class="atencion-card-header">
           <div>
             <span class="atencion-id">#{{ a.id }}</span>
@@ -219,12 +244,25 @@
       </article>
     </div>
 
+    <div class="ver-todas-wrap" *ngIf="misAtencionesFiltradas.length > limiteMisAtenciones">
+      <button type="button" class="button-quiet" (click)="mostrarTodasMisAtenciones = !mostrarTodasMisAtenciones">
+        {{ mostrarTodasMisAtenciones ? 'Ver menos' : 'Ver todas mis reservas (' + misAtencionesFiltradas.length + ')' }}
+      </button>
+    </div>
+
     <ng-template #sinAtencionesPaciente>
-      <div class="empty-state">
+      <div class="empty-state" *ngIf="misAtenciones.length === 0; else sinResultadosFiltro">
         <span class="empty-icon">🩺</span>
         <h3>Aún no tienes citas registradas</h3>
         <p>Agenda tu primera hora médica arriba.</p>
       </div>
+      <ng-template #sinResultadosFiltro>
+        <div class="empty-state">
+          <span class="empty-icon">🔎</span>
+          <h3>No tienes citas en este estado</h3>
+          <p>Prueba con otra pestaña para ver el resto de tus citas.</p>
+        </div>
+      </ng-template>
     </ng-template>
   </section>
 

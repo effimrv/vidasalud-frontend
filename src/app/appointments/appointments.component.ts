@@ -41,6 +41,11 @@ export class AppointmentsComponent implements OnInit {
   filtroEstado: string = 'TODAS';
   terminoBusqueda: string = '';
 
+  // Filtro de estado (Paciente)
+  filtroEstadoPaciente: string = 'TODAS';
+  mostrarTodasMisAtenciones: boolean = false;
+  readonly limiteMisAtenciones: number = 2;
+
   // Mensajes
   exitoMensaje: string = '';
   errorMensaje: string = '';
@@ -107,7 +112,30 @@ export class AppointmentsComponent implements OnInit {
     if (!nombreSesion) {
       return [];
     }
-    return this.atenciones.filter(a => this.normalizarNombre(a.pacienteNombre) === nombreSesion);
+    const propias = this.atenciones.filter(a => this.normalizarNombre(a.pacienteNombre) === nombreSesion);
+    return this.ordenarPorMasReciente(propias);
+  }
+
+  get misAtencionesFiltradas(): Appointment[] {
+    if (this.filtroEstadoPaciente === 'TODAS') {
+      return this.misAtenciones;
+    }
+    return this.misAtenciones.filter(a => a.estado === this.filtroEstadoPaciente);
+  }
+
+  get misAtencionesVisibles(): Appointment[] {
+    return this.mostrarTodasMisAtenciones
+      ? this.misAtencionesFiltradas
+      : this.misAtencionesFiltradas.slice(0, this.limiteMisAtenciones);
+  }
+
+  countMisAtencionesPorEstado(estado: string): number {
+    return this.misAtenciones.filter(a => a.estado === estado).length;
+  }
+
+  seleccionarFiltroPaciente(estado: string): void {
+    this.filtroEstadoPaciente = estado;
+    this.mostrarTodasMisAtenciones = false;
   }
 
   private normalizarNombre(nombre?: string | null): string {
@@ -132,7 +160,15 @@ export class AppointmentsComponent implements OnInit {
         a.pacienteNombre.toLowerCase().includes(q)
       );
     }
-    return lista;
+    return this.ordenarPorMasReciente(lista);
+  }
+
+  private ordenarPorMasReciente(lista: Appointment[]): Appointment[] {
+    return [...lista].sort((a, b) => {
+      const fechaA = a.creadaEn ? new Date(a.creadaEn).getTime() : 0;
+      const fechaB = b.creadaEn ? new Date(b.creadaEn).getTime() : 0;
+      return fechaB - fechaA || b.id - a.id;
+    });
   }
 
   countPorEstado(estado: string): number {

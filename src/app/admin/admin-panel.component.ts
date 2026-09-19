@@ -204,7 +204,11 @@ export class AdminPanelComponent implements OnInit {
         a.pacienteNombre.toLowerCase().includes(q)
       );
     }
-    return lista;
+    return [...lista].sort((a, b) => {
+      const fechaA = a.creadaEn ? new Date(a.creadaEn).getTime() : 0;
+      const fechaB = b.creadaEn ? new Date(b.creadaEn).getTime() : 0;
+      return fechaB - fechaA || b.id - a.id;
+    });
   }
 
   countPorEstado(estado: string): number {
