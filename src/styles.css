@@ -266,6 +266,13 @@ html { scroll-behavior: smooth; }
 .about-stat-card strong { display: block; margin-bottom: 8px; font: 700 40px 'Space Grotesk'; color: var(--teal); }
 .about-stat-card span { color: var(--muted); font-size: 14px; line-height: 1.5; }
 
+.values-section { margin-top: 60px; }
+.values-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.value-card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 26px 22px; }
+.value-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--chip); display: grid; place-items: center; font-size: 22px; margin-bottom: 14px; }
+.value-card h3 { margin: 0 0 8px; font: 600 17px 'Space Grotesk'; color: var(--heading); }
+.value-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
 .about-gallery { margin-top: 60px; }
 .about-gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .about-gallery-grid .showcase-card { min-height: 320px; }
@@ -570,6 +577,7 @@ body.dark-mode a:focus-visible, body.dark-mode button:focus-visible, body.dark-m
 	.specialties-grid { grid-template-columns: repeat(2, 1fr); }
 	.info-details { grid-template-columns: repeat(2, 1fr); }
 	.about-stats, .about-gallery-grid { grid-template-columns: 1fr; }
+	.values-grid { grid-template-columns: repeat(2, 1fr); }
 	.form-grid { grid-template-columns: 1fr; }
 	.hero-visual { width: 260px; }
 	.hero-badge-card { right: -6px; }
@@ -594,7 +602,7 @@ body.dark-mode a:focus-visible, body.dark-mode button:focus-visible, body.dark-m
 	.about-hero-img { width: 180px; height: 180px; }
 	.hero-badge-card { display: none; }
 	.quick-access-wrap { width: 92vw; margin-top: 16px; }
-	.feature-grid, .stats-row, .catalog-grid, .specialties-grid, .charts-grid, .info-details { grid-template-columns: 1fr; }
+	.feature-grid, .stats-row, .catalog-grid, .specialties-grid, .charts-grid, .info-details, .values-grid { grid-template-columns: 1fr; }
 	.chart-row { grid-template-columns: 96px 1fr 28px; gap: 8px; }
 	.page-heading { align-items: start; flex-direction: column; gap: 18px; }
 	.page-heading h1 { font-size: 32px; }
