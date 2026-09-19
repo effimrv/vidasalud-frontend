@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { timeout, catchError, of } from 'rxjs';
 import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
 import { AdminPanelComponent } from '../admin/admin-panel.component';
 import { ESPECIALIDADES } from '../shared/especialidades';
@@ -15,6 +16,8 @@ export class AppointmentsComponent implements OnInit {
   atenciones: Appointment[] = [];
   catalogo: ClinicalService[] = [];
   yo: UserProfile | null = null;
+  /** true en cuanto getMe() responde (con éxito o error), para no dejar el loader de rol pegado si la llamada falla. */
+  rolResuelto: boolean = false;
   infoInstitucional: InstitutionalInfo | null = null;
   actualizando: boolean = false;
   ultimaActualizacion: string = 'hace instantes';
@@ -58,11 +61,15 @@ export class AppointmentsComponent implements OnInit {
   }
 
   cargarDatos(): void {
-    this.api.getMe().subscribe({
-      next: r => {
-        this.yo = r;
-      },
-      error: err => console.warn('No se pudo obtener información del usuario:', err)
+    this.api.getMe().pipe(
+      timeout(10000),
+      catchError(err => {
+        console.warn('No se pudo obtener información del usuario:', err);
+        return of(null);
+      })
+    ).subscribe(r => {
+      this.yo = r;
+      this.rolResuelto = true;
     });
 
     this.api.getCatalog().subscribe({
