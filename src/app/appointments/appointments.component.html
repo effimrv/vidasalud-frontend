@@ -282,14 +282,9 @@
       <article class="service-card" *ngFor="let serv of catalogo">
         <div class="service-card-head">
           <span class="service-icon">⚕️</span>
-          <span class="service-price">{{ formatearPrecio(serv.precio) }}</span>
         </div>
         <h3>{{ serv.nombre }}</h3>
         <p class="service-desc">{{ getDescripcionServicio(serv.nombre) }}</p>
-        <p class="service-info">
-          Box asignado: <strong>Box {{ serv.boxId || '1' }}</strong><br />
-          Cupos disponibles: <strong>{{ serv.cuposDisponibles }}</strong>
-        </p>
         <button
           type="button"
           class="button button-quiet btn-full"
