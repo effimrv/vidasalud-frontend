@@ -62,25 +62,9 @@
       </div>
     </div>
 
-    <div class="mega-item" [class.open]="menuAbierto === 'nosotros'">
-      <button type="button" class="mega-trigger" (click)="toggleMenu('nosotros')">
-        Nosotros <span class="chev" aria-hidden="true">⌄</span>
-      </button>
-      <div class="mega-panel" *ngIf="menuAbierto === 'nosotros'">
-        <a class="mega-link" routerLink="/" fragment="horario" (click)="cerrarMenu()">
-          <span class="mega-link-icon" aria-hidden="true">🕒</span>
-          <span class="mega-link-text"><strong>Horario de atención</strong><small>Días y horas disponibles</small></span>
-        </a>
-        <a class="mega-link" routerLink="/" fragment="seguridad" (click)="cerrarMenu()">
-          <span class="mega-link-icon" aria-hidden="true">🔐</span>
-          <span class="mega-link-text"><strong>Seguridad y datos</strong><small>Cómo protegemos tu información</small></span>
-        </a>
-        <a class="mega-link" routerLink="/" fragment="contacto" (click)="cerrarMenu()">
-          <span class="mega-link-icon" aria-hidden="true">📍</span>
-          <span class="mega-link-text"><strong>Contacto</strong><small>Escríbenos o llámanos</small></span>
-        </a>
-      </div>
-    </div>
+    <a class="mega-trigger" routerLink="/nosotros" (click)="cerrarMenu()">
+      Nosotros
+    </a>
   </div>
 </nav>
 

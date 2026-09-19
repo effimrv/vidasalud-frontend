@@ -1,0 +1,86 @@
+<!-- Hero -->
+<section class="hero-panel about-hero">
+  <div class="hero-copy">
+    <span class="eyebrow">CONECTADOS POR TU SALUD</span>
+    <h1>{{ info?.titulo || 'Sobre VidaSalud' }}</h1>
+    <p>{{ info?.descripcion }}</p>
+    <p class="about-hero-highlight">
+      Somos una red que conecta <strong>20 centros de atención primaria y clínicas dentales</strong> a lo largo de Chile
+      en una sola plataforma: agenda, notifica, monitorea en tiempo real y da trazabilidad completa a cada atención,
+      de principio a fin.
+    </p>
+  </div>
+  <div class="hero-visual about-hero-visual" aria-hidden="true">
+    <img src="img-nosotros-chile.jpg" alt="" class="about-hero-img" />
+  </div>
+</section>
+
+<!-- Estadísticas de la red -->
+<section class="about-stats">
+  <article class="about-stat-card">
+    <strong>20</strong>
+    <span>Centros de atención primaria y clínicas dentales conectados</span>
+  </article>
+  <article class="about-stat-card">
+    <strong>100%</strong>
+    <span>Atenciones agendadas y monitoreadas en línea, sin planillas ni WhatsApp</span>
+  </article>
+  <article class="about-stat-card">
+    <strong>4</strong>
+    <span>Roles trabajando coordinados: paciente, recepción, administración y auditoría</span>
+  </article>
+</section>
+
+<!-- Galería -->
+<section class="about-gallery">
+  <div class="section-title-wrap">
+    <span class="eyebrow">NUESTRO COMPROMISO</span>
+    <h2>Una red humana, cercana y conectada</h2>
+    <p>Digitalizamos la gestión de atenciones sin perder lo esencial: el trato cercano con cada paciente.</p>
+  </div>
+
+  <div class="about-gallery-grid">
+    <article class="showcase-card">
+      <img src="img-nosotros-cercania.webp" alt="Médico sosteniendo la mano de un paciente" loading="lazy" />
+      <div class="showcase-overlay">
+        <span class="showcase-tag">Cercanía</span>
+        <h3>Confianza en cada atención</h3>
+      </div>
+    </article>
+    <article class="showcase-card">
+      <img src="img-nosotros-consulta.jpg" alt="Doctora conversando con una paciente durante una consulta" loading="lazy" />
+      <div class="showcase-overlay">
+        <span class="showcase-tag">Cuidado</span>
+        <h3>Atención humana y profesional</h3>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- Información de contacto -->
+<section class="info-section" *ngIf="info">
+  <div class="section-title-wrap">
+    <span class="eyebrow">DATOS DE CONTACTO</span>
+    <h2>Habla con nosotros</h2>
+  </div>
+  <div class="info-card">
+    <div class="info-details">
+      <div class="info-detail-item">
+        <strong>📍 Dirección</strong>
+        <span>{{ info.direccion }}</span>
+      </div>
+      <div class="info-detail-item">
+        <strong>🕒 Horario</strong>
+        <span>{{ info.horario }}</span>
+      </div>
+      <div class="info-detail-item">
+        <strong>☎️ Teléfono</strong>
+        <span>{{ info.telefono }}</span>
+      </div>
+      <div class="info-detail-item">
+        <strong>✉️ Email</strong>
+        <span>{{ info.email }}</span>
+      </div>
+    </div>
+  </div>
+</section>
