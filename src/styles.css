@@ -347,6 +347,8 @@ textarea.form-control { resize: vertical; line-height: 1.6; }
 .form-control-readonly { background: var(--surface-alt); color: var(--muted); cursor: not-allowed; }
 .form-control-readonly:focus { border-color: var(--line); }
 .form-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.info-form { padding: 26px; }
+.info-form .form-actions { padding-top: 18px; border-top: 1px solid var(--line); }
 .form-actions .button-primary { margin-top: 4px; }
 .form-actions .button-quiet { padding: 11px 17px; font-size: 16px; }
 .modal-card .form-actions .button,
