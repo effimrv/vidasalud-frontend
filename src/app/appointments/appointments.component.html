@@ -8,10 +8,16 @@
   <button type="button" class="alert-close" (click)="errorMensaje = ''">&times;</button>
 </div>
 
+<!-- Estado de carga mientras se confirma el rol de la sesión, evita mostrar por un instante la vista de paciente antes de la de admin/recepción -->
+<div class="loading-role" *ngIf="!yo">
+  <span class="spinner" aria-hidden="true"></span>
+  <p>Cargando tu portal...</p>
+</div>
+
 <!-- ========================================================================= -->
 <!-- 1. VISTA DE USUARIO / PACIENTE                                           -->
 <!-- ========================================================================= -->
-<ng-container *ngIf="modoActivo === 'paciente'">
+<ng-container *ngIf="yo && modoActivo === 'paciente'">
   <!-- Cabecera amigable del paciente -->
   <section class="dashboard-hero">
     <div class="page-heading">
@@ -328,7 +334,7 @@
 <!-- ========================================================================= -->
 <!-- 2. VISTA DE RECEPCIONISTA (PANEL OPERATIVO)                              -->
 <!-- ========================================================================= -->
-<ng-container *ngIf="modoActivo === 'recepcion'">
+<ng-container *ngIf="yo && modoActivo === 'recepcion'">
   <div class="admin-console">
   <section class="dashboard-hero dashboard-hero-admin">
     <div class="page-heading">
@@ -567,7 +573,7 @@
 <!-- ========================================================================= -->
 <!-- 3. VISTA DE ADMINISTRADOR (GESTIÓN DE CATÁLOGO, MÉTRICAS Y SUPERVISIÓN)  -->
 <!-- ========================================================================= -->
-<ng-container *ngIf="modoActivo === 'admin'">
+<ng-container *ngIf="yo && modoActivo === 'admin'">
   <div class="admin-console">
     <app-admin-panel [atenciones]="atenciones" [yo]="yo"></app-admin-panel>
   </div>

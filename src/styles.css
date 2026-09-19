@@ -555,6 +555,10 @@ body.dark-mode a:focus-visible, body.dark-mode button:focus-visible, body.dark-m
 .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255, 255, 255, .4); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.loading-role { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 120px 20px; color: var(--muted); }
+.loading-role .spinner { width: 32px; height: 32px; border-width: 3px; border-color: var(--line); border-top-color: var(--teal); margin-right: 0; }
+.loading-role p { font-size: 14px; margin: 0; }
+
 /* Responsivo */
 @media (max-width: 900px) {
 	.stats-admin { grid-template-columns: repeat(2, 1fr); }
