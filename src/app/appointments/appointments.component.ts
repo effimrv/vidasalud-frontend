@@ -124,13 +124,9 @@ export class AppointmentsComponent implements OnInit {
     return 'paciente';
   }
 
+  /** Para un paciente, el BFF ya devuelve solo sus propias atenciones (filtradas por su identidad en Entra ID). */
   get misAtenciones(): Appointment[] {
-    const nombreSesion = this.normalizarNombre(this.yo?.nombre);
-    if (!nombreSesion) {
-      return [];
-    }
-    const propias = this.atenciones.filter(a => this.normalizarNombre(a.pacienteNombre) === nombreSesion);
-    return this.ordenarPorMasReciente(propias);
+    return this.ordenarPorMasReciente(this.atenciones);
   }
 
   get misAtencionesFiltradas(): Appointment[] {
@@ -153,10 +149,6 @@ export class AppointmentsComponent implements OnInit {
   seleccionarFiltroPaciente(estado: string): void {
     this.filtroEstadoPaciente = estado;
     this.mostrarTodasMisAtenciones = false;
-  }
-
-  private normalizarNombre(nombre?: string | null): string {
-    return (nombre ?? '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   }
 
   get proximaAtencion(): Appointment | undefined {
