@@ -6,7 +6,10 @@ import { filter, Observable, switchMap, take } from 'rxjs';
 import { bffUrl } from './auth.config';
 
 export interface UserProfile {
+  /** Nombre para mostrar, para el saludo. */
   nombre: string;
+  /** Nombre y apellido, para la ficha clínica. */
+  nombreCompleto?: string;
   usuario: string;
   roles: string[];
 }

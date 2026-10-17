@@ -125,6 +125,11 @@ export class AppointmentsComponent implements OnInit {
   }
 
   /** Para un paciente, el BFF ya devuelve solo sus propias atenciones (filtradas por su identidad en Entra ID). */
+  /** Nombre formal del paciente para la cita (nombre y apellido); si no está, el nombre para mostrar. */
+  get nombreFicha(): string {
+    return (this.yo?.nombreCompleto || this.yo?.nombre || '').trim();
+  }
+
   get misAtenciones(): Appointment[] {
     return this.ordenarPorMasReciente(this.atenciones);
   }
@@ -302,7 +307,7 @@ export class AppointmentsComponent implements OnInit {
   }
 
   agendarCita(): void {
-    const nombrePaciente = this.yo?.nombre?.trim();
+    const nombrePaciente = this.nombreFicha;
     if (!this.nuevoServicioId || !nombrePaciente || !this.nuevaFecha || !this.nuevaHora) {
       this.errorMensaje = 'No se pudo verificar tu sesión. Vuelve a iniciar sesión y selecciona especialidad, fecha y horario.';
       return;

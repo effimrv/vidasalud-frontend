@@ -70,11 +70,11 @@
             id="pacienteNombre"
             type="text"
             class="form-control form-control-readonly"
-            [value]="yo?.nombre || ''"
+            [value]="nombreFicha"
             readonly
             disabled
           />
-          <small class="text-subtle">👤 Paciente: {{ yo?.nombre }} (Sesión verificada ✓)</small>
+          <small class="text-subtle">👤 Paciente: {{ nombreFicha }} (Sesión verificada ✓)</small>
         </div>
 
         <div class="form-group">
@@ -135,7 +135,7 @@
         <button
           type="submit"
           class="button button-primary"
-          [disabled]="guardandoCita || !nuevoServicioId || !yo?.nombre || !nuevaFecha || !nuevaHora"
+          [disabled]="guardandoCita || !nuevoServicioId || !nombreFicha || !nuevaFecha || !nuevaHora"
         >
           <span *ngIf="guardandoCita" class="spinner"></span>
           {{ guardandoCita ? 'Registrando cita...' : '+ Confirmar Solicitud de Cita' }}
