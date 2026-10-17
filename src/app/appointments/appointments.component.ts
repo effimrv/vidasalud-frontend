@@ -14,7 +14,7 @@ import { ESPECIALIDADES } from '../shared/especialidades';
 import { describirErrorHttp } from '../shared/mensajes-error';
 import { informeMedico, InformeMedico } from '../shared/informes-medicos';
 import {
-  ESTADOS_CANCELABLES, ESTADOS_EN_CURSO, estadoLegible, formatearFechaHoraCita, formatearFechaHoraSolicitud,
+  ESTADOS_CANCELABLES, ESTADOS_EN_CURSO, estadoCorto, estadoLegible, formatearFechaHoraCita, formatearFechaHoraSolicitud,
   formatearPrecio, haceCuanto
 } from '../shared/formato';
 
@@ -81,6 +81,7 @@ export class AppointmentsComponent implements OnInit {
   private siguienteAviso = 0;
 
   readonly estadoLegible = estadoLegible;
+  readonly estadoCorto = estadoCorto;
   readonly formatearPrecio = formatearPrecio;
   readonly formatearFechaHoraCita = formatearFechaHoraCita;
   readonly formatearFechaHoraSolicitud = formatearFechaHoraSolicitud;

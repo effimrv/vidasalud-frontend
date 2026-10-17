@@ -26,6 +26,19 @@ export function estadoLegible(estado: string): string {
   }
 }
 
+/** Versión corta del estado, para tablas y listas donde el espacio es limitado. */
+export function estadoCorto(estado: string): string {
+  switch (estado) {
+    case 'SOLICITADA': return 'En revisión';
+    case 'CONFIRMADA': return 'Confirmada';
+    case 'EN_ESPERA': return 'En espera';
+    case 'EN_ATENCION': return 'En consulta';
+    case 'CERRADA': return 'Finalizada';
+    case 'CANCELADA': return 'Cancelada';
+    default: return estado;
+  }
+}
+
 /** Índice del paso actual en PASOS_CITA (-1 si la cita está cancelada). */
 export function indicePaso(estado: string): number {
   return PASOS_CITA.findIndex(p => p.estado === estado);

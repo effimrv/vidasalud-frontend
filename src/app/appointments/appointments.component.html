@@ -506,10 +506,10 @@
             </td>
             <td>{{ formatearFechaHoraCita(a.fechaHora) }}</td>
             <td>
-              <span class="status-badge" [ngClass]="'badge-' + a.estado.toLowerCase()">
-                {{ estadoLegible(a.estado) }}
+              <span class="status-badge" [ngClass]="'badge-' + a.estado.toLowerCase()" [attr.title]="estadoLegible(a.estado)">
+                {{ estadoCorto(a.estado) }}
               </span>
-              <small class="text-subtle d-block" *ngIf="a.actualizadaEn">{{ haceCuanto(a.actualizadaEn) }}</small>
+              <small class="text-subtle d-block estado-hace" *ngIf="a.actualizadaEn">{{ haceCuanto(a.actualizadaEn) }}</small>
             </td>
             <td class="td-actions">
               <div class="td-actions-inner">

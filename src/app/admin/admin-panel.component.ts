@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
 import { describirErrorHttp } from '../shared/mensajes-error';
-import { estadoLegible, formatearFechaHoraCita, formatearPrecio, haceCuanto } from '../shared/formato';
+import { estadoCorto, estadoLegible, formatearFechaHoraCita, formatearPrecio, haceCuanto } from '../shared/formato';
 
 @Component({
   selector: 'app-admin-panel',
@@ -20,6 +20,7 @@ export class AdminPanelComponent implements OnInit {
   @Output() verDetalle = new EventEmitter<number>();
 
   readonly estadoLegible = estadoLegible;
+  readonly estadoCorto = estadoCorto;
   readonly formatearPrecio = formatearPrecio;
   readonly formatearFechaHoraCita = formatearFechaHoraCita;
   readonly haceCuanto = haceCuanto;
