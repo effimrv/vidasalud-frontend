@@ -1,16 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { timeout, catchError, of } from 'rxjs';
-import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { timeout, catchError, of, interval } from 'rxjs';
+import {
+  ApiService, Appointment, BloqueHorario, ClinicalService, EstadoAtencion, InstitutionalInfo, UserProfile
+} from '../api.service';
 import { AdminPanelComponent } from '../admin/admin-panel.component';
+import { DetalleCitaComponent } from '../shared/detalle-cita.component';
+import { ProgresoCitaComponent } from '../shared/progreso-cita.component';
 import { ESPECIALIDADES } from '../shared/especialidades';
 import { describirErrorHttp } from '../shared/mensajes-error';
+import { informeMedico, InformeMedico } from '../shared/informes-medicos';
+import {
+  ESTADOS_CANCELABLES, ESTADOS_EN_CURSO, estadoLegible, formatearFechaHoraCita, formatearFechaHoraSolicitud,
+  formatearPrecio, haceCuanto
+} from '../shared/formato';
+
+/** Cada cuánto se sincronizan las citas con el servidor (las vistas muestran el estado real en vivo). */
+const REFRESCO_MS = 5000;
+/** Cuánto permanece visible un aviso de cambio de estado. */
+const DURACION_AVISO_MS = 7000;
+
+interface AvisoCambio {
+  id: number;
+  texto: string;
+}
 
 @Component({
   selector: 'app-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminPanelComponent],
+  imports: [CommonModule, FormsModule, AdminPanelComponent, DetalleCitaComponent, ProgresoCitaComponent],
   templateUrl: './appointments.component.html'
 })
 export class AppointmentsComponent implements OnInit {
@@ -18,22 +39,20 @@ export class AppointmentsComponent implements OnInit {
   catalogo: ClinicalService[] = [];
   yo: UserProfile | null = null;
   /** true en cuanto getMe() responde (con éxito o error), para no dejar el loader de rol pegado si la llamada falla. */
-  rolResuelto: boolean = false;
+  rolResuelto = false;
   infoInstitucional: InstitutionalInfo | null = null;
-  actualizando: boolean = false;
-  ultimaActualizacion: string = 'hace instantes';
+  actualizando = false;
+  /** Instante (ms) de la última sincronización correcta con el servidor. */
+  ultimaSincronizacion = 0;
 
   // Formulario de nueva cita
   nuevoServicioId: number | null = null;
-  nuevaFecha: string = '';
-  nuevaHora: string = '';
-  guardandoCita: boolean = false;
+  nuevaFecha = '';
+  nuevaHora = '';
+  bloques: BloqueHorario[] = [];
+  cargandoBloques = false;
+  guardandoCita = false;
   procesandoId: number | null = null;
-
-  readonly bloquesHorario: string[] = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '15:00', '15:30', '16:00', '16:30'
-  ];
 
   readonly fechaMinima: string = (() => {
     const hoy = new Date();
@@ -42,23 +61,37 @@ export class AppointmentsComponent implements OnInit {
     return `${hoy.getFullYear()}-${mm}-${dd}`;
   })();
 
-  // Filtros Admin
-  filtroEstado: string = 'TODAS';
-  terminoBusqueda: string = '';
+  // Filtros de recepción
+  filtroEstado = 'TODAS';
+  terminoBusqueda = '';
 
-  // Filtro de estado (Paciente)
-  filtroEstadoPaciente: string = 'TODAS';
-  mostrarTodasMisAtenciones: boolean = false;
-  readonly limiteMisAtenciones: number = 2;
+  // Filtro de estado (paciente)
+  filtroEstadoPaciente = 'TODAS';
+  mostrarTodasMisAtenciones = false;
+  readonly limiteMisAtenciones = 3;
+
+  // Detalle de cita abierto (paciente o recepción)
+  atencionDetalleId: number | null = null;
 
   // Mensajes
-  exitoMensaje: string = '';
-  errorMensaje: string = '';
+  exitoMensaje = '';
+  errorMensaje = '';
+  avisos: AvisoCambio[] = [];
+  private estadosConocidos = new Map<number, EstadoAtencion>();
+  private siguienteAviso = 0;
 
-  constructor(private api: ApiService) {}
+  readonly estadoLegible = estadoLegible;
+  readonly formatearPrecio = formatearPrecio;
+  readonly formatearFechaHoraCita = formatearFechaHoraCita;
+  readonly formatearFechaHoraSolicitud = formatearFechaHoraSolicitud;
+  readonly haceCuanto = haceCuanto;
+  readonly informeMedico: (a: Appointment) => InformeMedico = informeMedico;
+
+  constructor(private api: ApiService, private destroyRef: DestroyRef) {}
 
   ngOnInit(): void {
     this.cargarDatos();
+    interval(REFRESCO_MS).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.sincronizar());
   }
 
   cargarDatos(): void {
@@ -94,20 +127,53 @@ export class AppointmentsComponent implements OnInit {
     this.recargarAtenciones();
   }
 
-  recargarAtenciones(): void {
-    this.actualizando = true;
+  /** Recarga las citas. En modo silencioso (sincronización periódica) no muestra el indicador de carga. */
+  recargarAtenciones(silencioso = false): void {
+    if (!silencioso) this.actualizando = true;
     this.api.getAppointments().subscribe({
       next: r => {
+        this.registrarCambios(r || []);
         this.atenciones = r || [];
         this.actualizando = false;
-        this.ultimaActualizacion = 'hace instantes';
+        this.ultimaSincronizacion = Date.now();
       },
       error: err => {
         console.warn('Error al cargar atenciones:', err);
-        this.errorMensaje = describirErrorHttp(err, 'cargar tus atenciones');
+        if (!silencioso) this.errorMensaje = describirErrorHttp(err, 'cargar tus atenciones');
         this.actualizando = false;
       }
     });
+  }
+
+  /** Sincronización periódica: estado de las citas y, si se está agendando, las horas que se van ocupando. */
+  private sincronizar(): void {
+    if (!this.rolResuelto || document.hidden) return;
+    this.recargarAtenciones(true);
+    if (this.modoActivo === 'paciente' && this.nuevoServicioId && this.nuevaFecha) {
+      this.cargarDisponibilidad(true);
+    }
+  }
+
+  /** Avisa al paciente cuando una de sus citas cambia de estado (lo hace el flujo automático del centro). */
+  private registrarCambios(nuevas: Appointment[]): void {
+    const primeraCarga = this.estadosConocidos.size === 0;
+    for (const a of nuevas) {
+      const anterior = this.estadosConocidos.get(a.id);
+      if (!primeraCarga && anterior && anterior !== a.estado && this.modoActivo === 'paciente') {
+        this.mostrarAviso(`Tu cita #${a.id} de ${this.getServicioNombre(a.servicioId)} pasó a: ${estadoLegible(a.estado)}`);
+      }
+      this.estadosConocidos.set(a.id, a.estado);
+    }
+  }
+
+  private mostrarAviso(texto: string): void {
+    const aviso = { id: ++this.siguienteAviso, texto };
+    this.avisos = [...this.avisos, aviso];
+    setTimeout(() => this.cerrarAviso(aviso.id), DURACION_AVISO_MS);
+  }
+
+  cerrarAviso(id: number): void {
+    this.avisos = this.avisos.filter(a => a.id !== id);
   }
 
   get esAdminRole(): boolean {
@@ -124,12 +190,18 @@ export class AppointmentsComponent implements OnInit {
     return 'paciente';
   }
 
-  /** Para un paciente, el BFF ya devuelve solo sus propias atenciones (filtradas por su identidad en Entra ID). */
+  get textoSincronizacion(): string {
+    return this.ultimaSincronizacion ? haceCuanto(new Date(this.ultimaSincronizacion).toISOString()) : 'cargando…';
+  }
+
   /** Nombre formal del paciente para la cita (nombre y apellido); si no está, el nombre para mostrar. */
   get nombreFicha(): string {
     return (this.yo?.nombreCompleto || this.yo?.nombre || '').trim();
   }
 
+  // ===== Vista del paciente =====
+
+  /** Para un paciente, el BFF ya devuelve solo sus propias atenciones (filtradas por su identidad en Entra ID). */
   get misAtenciones(): Appointment[] {
     return this.ordenarPorMasReciente(this.atenciones);
   }
@@ -157,10 +229,10 @@ export class AppointmentsComponent implements OnInit {
   }
 
   get proximaAtencion(): Appointment | undefined {
-    return this.misAtenciones.find(a =>
-      a.estado === 'SOLICITADA' || a.estado === 'CONFIRMADA' || a.estado === 'EN_ESPERA' || a.estado === 'EN_ATENCION'
-    );
+    return this.misAtenciones.find(a => ESTADOS_EN_CURSO.includes(a.estado));
   }
+
+  // ===== Vista de recepción =====
 
   get atencionesFiltradasAdmin(): Appointment[] {
     let lista = this.atenciones;
@@ -177,139 +249,59 @@ export class AppointmentsComponent implements OnInit {
     return this.ordenarPorMasReciente(lista);
   }
 
-  private ordenarPorMasReciente(lista: Appointment[]): Appointment[] {
-    return [...lista].sort((a, b) => {
-      const fechaA = a.creadaEn ? new Date(a.creadaEn).getTime() : 0;
-      const fechaB = b.creadaEn ? new Date(b.creadaEn).getTime() : 0;
-      return fechaB - fechaA || b.id - a.id;
-    });
-  }
-
   countPorEstado(estado: string): number {
     return this.atenciones.filter(a => a.estado === estado).length;
   }
 
-  getServicioNombre(servicioId: number): string {
-    const serv = this.catalogo.find(s => s.id === servicioId);
-    return serv ? serv.nombre : `Servicio #${servicioId}`;
+  esCancelable(a: Appointment): boolean {
+    return ESTADOS_CANCELABLES.includes(a.estado);
   }
 
-  getServicioPrecio(servicioId: number): number | undefined {
-    const serv = this.catalogo.find(s => s.id === servicioId);
-    return serv?.precio;
+  // ===== Agenda =====
+
+  /** Al cambiar la prestación o la fecha se consultan las horas disponibles de ese día. */
+  alCambiarAgenda(): void {
+    this.nuevaHora = '';
+    this.cargarDisponibilidad();
   }
 
-  getDescripcionServicio(nombre: string): string {
-    const especialidad = ESPECIALIDADES.find(e => e.nombre === nombre);
-    return especialidad?.descripcion ?? 'Atención médica especializada en esta prestación.';
-  }
-
-  getImagenServicio(nombre: string): string | null {
-    const especialidad = ESPECIALIDADES.find(e => e.nombre === nombre);
-    return especialidad?.imagen ?? null;
-  }
-
-  getEstadoLegible(estado: string): string {
-    switch (estado) {
-      case 'SOLICITADA': return 'Solicitud en Revisión';
-      case 'CONFIRMADA': return 'Hora Confirmada';
-      case 'EN_ESPERA': return 'En Sala de Espera';
-      case 'EN_ATENCION': return 'En Consulta Médica';
-      case 'CERRADA': return 'Atención Finalizada';
-      case 'CANCELADA': return 'Cita Cancelada';
-      default: return estado;
+  cargarDisponibilidad(silencioso = false): void {
+    if (!this.nuevoServicioId || !this.nuevaFecha) {
+      this.bloques = [];
+      return;
     }
+    if (!silencioso) this.cargandoBloques = true;
+    this.api.getDisponibilidad(this.nuevoServicioId, this.nuevaFecha).subscribe({
+      next: bloques => {
+        this.bloques = bloques;
+        this.cargandoBloques = false;
+        // Si la hora elegida se ocupó mientras el paciente decidía, se deselecciona.
+        if (this.nuevaHora && !bloques.some(b => b.hora === this.nuevaHora && b.disponible)) {
+          this.nuevaHora = '';
+          if (silencioso) this.errorMensaje = 'La hora que habías elegido acaba de ser reservada por otro paciente. Elige otra.';
+        }
+      },
+      error: err => {
+        this.cargandoBloques = false;
+        if (!silencioso) this.errorMensaje = describirErrorHttp(err, 'consultar las horas disponibles');
+      }
+    });
   }
 
-  formatearPrecio(valor?: number): string {
-    if (valor === undefined || valor === null) return '$0';
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      maximumFractionDigits: 0
-    }).format(valor);
-  }
-
-  formatearFechaHoraCita(fechaHora?: string): string {
-    if (!fechaHora) return 'Por confirmar';
-    try {
-      const d = new Date(fechaHora);
-      const dia = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
-      const hora = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
-      return `${dia}, ${hora} hrs`;
-    } catch {
-      return fechaHora;
-    }
-  }
-
-  formatearFechaHoraSolicitud(creadaEn?: string): string {
-    if (!creadaEn) return 'Fecha no disponible';
-    try {
-      const d = new Date(creadaEn);
-      const dia = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
-      const hora = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
-      return `${dia} a las ${hora} hrs`;
-    } catch {
-      return creadaEn;
-    }
-  }
-
-  private readonly informesPorEspecialidad: Record<number, { diagnostico: string; indicaciones: string; medicos: string[] }[]> = {
-    1: [
-      { diagnostico: 'Cuadro gripal leve con buena evolución clínica', indicaciones: 'Reposo relativo por 48 horas, hidratación abundante y control SOS si persisten los síntomas.', medicos: ['Dr. Roberto Silva - Med. General', 'Dra. Camila Torres - Med. General'] },
-      { diagnostico: 'Control de salud general - Parámetros dentro de rango normal', indicaciones: 'Mantener hábitos alimenticios saludables y actividad física regular. Próximo control en 6 meses.', medicos: ['Dr. Roberto Silva - Med. General', 'Dra. Camila Torres - Med. General'] }
-    ],
-    2: [
-      { diagnostico: 'Control de niño sano - Desarrollo acorde a la edad', indicaciones: 'Continuar esquema de vacunación según calendario. Control en 3 meses.', medicos: ['Dra. Fernanda Muñoz - Pediatra', 'Dr. Sebastián Rojas - Pediatra'] },
-      { diagnostico: 'Rinofaringitis aguda leve - Buena evolución', indicaciones: 'Abundante hidratación, lavado nasal con suero fisiológico y control si hay fiebre persistente.', medicos: ['Dra. Fernanda Muñoz - Pediatra', 'Dr. Sebastián Rojas - Pediatra'] }
-    ],
-    3: [
-      { diagnostico: 'Contractura muscular lumbar - Mejoría tras la sesión', indicaciones: 'Aplicar calor local, evitar cargar peso y continuar los ejercicios de elongación indicados.', medicos: ['Klgo. Matías Bravo - Kinesiología', 'Klga. Valentina Soto - Kinesiología'] },
-      { diagnostico: 'Rehabilitación post-esguince de tobillo - Evolución favorable', indicaciones: 'Continuar ejercicios de fortalecimiento progresivo. Próxima sesión en 1 semana.', medicos: ['Klgo. Matías Bravo - Kinesiología', 'Klga. Valentina Soto - Kinesiología'] }
-    ],
-    4: [
-      { diagnostico: 'Evaluación preventiva cardiovascular en rango normal', indicaciones: 'Mantener control de presión arterial en casa y dieta baja en sodio. Control en 6 meses.', medicos: ['Dr. Andrés Fuentes - Cardiólogo', 'Dra. Paula Contreras - Cardióloga'] },
-      { diagnostico: 'Control de presión arterial - Estable, sin hallazgos relevantes', indicaciones: 'Continuar tratamiento indicado y actividad física moderada. Control en 3 meses.', medicos: ['Dr. Andrés Fuentes - Cardiólogo', 'Dra. Paula Contreras - Cardióloga'] }
-    ],
-    5: [
-      { diagnostico: 'Dermatitis leve - Buena respuesta a tratamiento tópico', indicaciones: 'Aplicar la crema indicada dos veces al día y evitar la exposición solar directa.', medicos: ['Dra. Josefina Vargas - Dermatóloga', 'Dr. Ignacio Peña - Dermatólogo'] },
-      { diagnostico: 'Control dermatológico preventivo - Sin lesiones sospechosas', indicaciones: 'Uso diario de protector solar y control anual de lunares.', medicos: ['Dra. Josefina Vargas - Dermatóloga', 'Dr. Ignacio Peña - Dermatólogo'] }
-    ],
-    6: [
-      { diagnostico: 'Control ginecológico preventivo - Resultados normales', indicaciones: 'Continuar controles anuales de rutina. Sin indicaciones adicionales.', medicos: ['Dra. Antonia Reyes - Ginecóloga', 'Dra. Constanza Díaz - Ginecóloga'] },
-      { diagnostico: 'Evaluación de salud reproductiva - Sin hallazgos relevantes', indicaciones: 'Mantener controles periódicos según indicación médica.', medicos: ['Dra. Antonia Reyes - Ginecóloga', 'Dra. Constanza Díaz - Ginecóloga'] }
-    ]
-  };
-
-  getInformeMedico(a: Appointment): { diagnostico: string; indicaciones: string; medico: string } {
-    const opciones = this.informesPorEspecialidad[a.servicioId] || this.informesPorEspecialidad[1];
-    const opcion = opciones[a.id % opciones.length];
-    const medico = opcion.medicos[a.id % opcion.medicos.length];
-    return { diagnostico: opcion.diagnostico, indicaciones: opcion.indicaciones, medico };
-  }
-
-  formatearFechaCorta(fechaIso: string): string {
-    try {
-      const [anio, mes, dia] = fechaIso.split('-').map(Number);
-      const d = new Date(anio, mes - 1, dia);
-      return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'long' });
-    } catch {
-      return fechaIso;
-    }
+  get horasDisponibles(): number {
+    return this.bloques.filter(b => b.disponible).length;
   }
 
   seleccionarServicioParaAgendar(servicioId: number): void {
     this.nuevoServicioId = servicioId;
-    const el = document.getElementById('seccion-agendar');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    this.alCambiarAgenda();
+    document.getElementById('seccion-agendar')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   agendarCita(): void {
     const nombrePaciente = this.nombreFicha;
     if (!this.nuevoServicioId || !nombrePaciente || !this.nuevaFecha || !this.nuevaHora) {
-      this.errorMensaje = 'No se pudo verificar tu sesión. Vuelve a iniciar sesión y selecciona especialidad, fecha y horario.';
+      this.errorMensaje = 'Selecciona especialidad, fecha y una hora disponible para continuar.';
       return;
     }
 
@@ -326,37 +318,85 @@ export class AppointmentsComponent implements OnInit {
     }).subscribe({
       next: nueva => {
         this.guardandoCita = false;
-        this.exitoMensaje = `¡Cita médica solicitada con éxito para ${nueva.pacienteNombre}, agendada para el ${this.formatearFechaHoraCita(nueva.fechaHora)}!`;
-        this.nuevaFecha = '';
+        this.exitoMensaje = `¡Solicitud registrada! Tu cita #${nueva.id} para el ${formatearFechaHoraCita(nueva.fechaHora)} `
+          + 'está en revisión automática; verás aquí cómo avanza.';
         this.nuevaHora = '';
         this.recargarAtenciones();
+        this.cargarDisponibilidad(true);
       },
-      error: err => {
+      error: (err: HttpErrorResponse) => {
         this.guardandoCita = false;
         console.error('Error al agendar cita:', err);
-        this.errorMensaje = describirErrorHttp(err, 'registrar la cita médica');
+        this.errorMensaje = err.status === 409
+          ? 'Esa hora acaba de ser reservada por otro paciente. Elige otra de las disponibles.'
+          : describirErrorHttp(err, 'registrar la cita médica');
+        this.cargarDisponibilidad(true);
       }
     });
   }
 
-  cambiarEstado(id: number, nuevoEstado: string): void {
-    this.procesandoId = id;
+  // ===== Acciones sobre una cita =====
+
+  verDetalle(id: number): void {
+    this.atencionDetalleId = id;
+  }
+
+  cerrarDetalle(): void {
+    this.atencionDetalleId = null;
+  }
+
+  cancelarCita(a: Appointment): void {
+    this.procesandoId = a.id;
     this.errorMensaje = '';
     this.exitoMensaje = '';
 
-    this.api.updateAppointmentStatus(id, nuevoEstado).subscribe({
+    this.api.updateAppointmentStatus(a.id, 'CANCELADA').subscribe({
       next: actual => {
         this.procesandoId = null;
-        this.exitoMensaje = `Atención #${actual.id} actualizada al estado ${actual.estado}.`;
+        this.exitoMensaje = `La cita #${actual.id} fue cancelada y su hora quedó disponible.`;
         this.recargarAtenciones();
       },
       error: err => {
         this.procesandoId = null;
-        console.error('Error al cambiar estado:', err);
+        console.error('Error al cancelar la cita:', err);
         this.errorMensaje = err?.status === 400
-          ? `La atención #${id} no puede pasar a "${this.getEstadoLegible(nuevoEstado)}" desde su estado actual.`
-          : describirErrorHttp(err, `cambiar el estado de la atención #${id}`);
+          ? `La cita #${a.id} ya no se puede cancelar: su estado cambió.`
+          : describirErrorHttp(err, `cancelar la cita #${a.id}`);
       }
+    });
+  }
+
+  // ===== Apoyo para la vista =====
+
+  getServicioNombre(servicioId: number): string {
+    const serv = this.catalogo.find(s => s.id === servicioId);
+    return serv ? serv.nombre : `Servicio #${servicioId}`;
+  }
+
+  getServicioPrecio(servicioId: number): number | undefined {
+    return this.catalogo.find(s => s.id === servicioId)?.precio;
+  }
+
+  getDescripcionServicio(nombre: string): string {
+    const especialidad = ESPECIALIDADES.find(e => e.nombre === nombre);
+    return especialidad?.descripcion ?? 'Atención médica especializada en esta prestación.';
+  }
+
+  getImagenServicio(nombre: string): string | null {
+    return ESPECIALIDADES.find(e => e.nombre === nombre)?.imagen ?? null;
+  }
+
+  formatearFechaCorta(fechaIso: string): string {
+    const [anio, mes, dia] = fechaIso.split('-').map(Number);
+    const d = new Date(anio, mes - 1, dia);
+    return isNaN(d.getTime()) ? fechaIso : d.toLocaleDateString('es-CL', { weekday: 'long', day: '2-digit', month: 'long' });
+  }
+
+  private ordenarPorMasReciente(lista: Appointment[]): Appointment[] {
+    return [...lista].sort((a, b) => {
+      const fechaA = a.creadaEn ? new Date(a.creadaEn).getTime() : 0;
+      const fechaB = b.creadaEn ? new Date(b.creadaEn).getTime() : 0;
+      return fechaB - fechaA || b.id - a.id;
     });
   }
 }

@@ -1,0 +1,80 @@
+<div class="modal-overlay" (click)="cerrar.emit()">
+  <div class="modal-card modal-detalle" role="dialog" aria-modal="true" aria-labelledby="titulo-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="titulo-detalle">Cita #{{ atencionId }}</h3>
+      <button type="button" class="alert-close" aria-label="Cerrar detalle" (click)="cerrar.emit()">&times;</button>
+    </div>
+
+    <div *ngIf="error" class="alert-banner alert-error">{{ error }}</div>
+
+    <div *ngIf="!detalle && !error" class="detalle-cargando">
+      <span class="spinner" aria-hidden="true"></span> Cargando detalle…
+    </div>
+
+    <ng-container *ngIf="detalle as d">
+      <div class="detalle-estado">
+        <span class="status-badge" [ngClass]="'badge-' + d.estado.toLowerCase()">{{ estadoLegible(d.estado) }}</span>
+        <span class="en-vivo" *ngIf="d.estado !== 'CERRADA' && d.estado !== 'CANCELADA'">En vivo</span>
+        <small class="text-subtle" *ngIf="d.actualizadaEn">Actualizado {{ haceCuanto(d.actualizadaEn) }}</small>
+      </div>
+      <p class="detalle-observacion" *ngIf="d.observacion">{{ d.observacion }}</p>
+
+      <app-progreso-cita [estado]="d.estado"></app-progreso-cita>
+
+      <div class="detalle-grid">
+        <section>
+          <h4>Paciente</h4>
+          <dl>
+            <dt>Nombre</dt>
+            <dd>
+              {{ d.pacienteNombre }}
+              <span class="tag-simulado" *ngIf="vistaPersonal && d.simulada" title="Reserva generada por la demanda simulada">Simulado</span>
+            </dd>
+            <ng-container *ngIf="vistaPersonal">
+              <dt>Correo</dt>
+              <dd>{{ d.pacienteCorreo || 'No registrado' }}</dd>
+            </ng-container>
+          </dl>
+        </section>
+        <section>
+          <h4>Cita</h4>
+          <dl>
+            <dt>Prestación</dt>
+            <dd>{{ nombreServicio }}</dd>
+            <dt>Valor</dt>
+            <dd>{{ precio }}</dd>
+            <ng-container *ngIf="d.boxId">
+              <dt>Box</dt>
+              <dd>Box {{ d.boxId }}</dd>
+            </ng-container>
+            <dt>Agendada para</dt>
+            <dd>{{ formatearFechaHoraCita(d.fechaHora) }}</dd>
+            <dt>Solicitada</dt>
+            <dd>{{ formatearFechaHoraSolicitud(d.creadaEn) }}</dd>
+          </dl>
+        </section>
+      </div>
+
+      <h4 class="historial-titulo">Historial de la cita</h4>
+      <ol class="historial" *ngIf="d.historial.length > 0; else sinHistorial">
+        <li *ngFor="let cambio of d.historial" [ngClass]="'historial-' + cambio.estado.toLowerCase()">
+          <span class="historial-punto" aria-hidden="true"></span>
+          <div>
+            <strong>{{ estadoLegible(cambio.estado) }}</strong>
+            <small>{{ formatearFechaHoraSolicitud(cambio.fecha) }} · {{ cambio.responsable }}</small>
+            <p *ngIf="cambio.detalle">{{ cambio.detalle }}</p>
+          </div>
+        </li>
+      </ol>
+      <ng-template #sinHistorial>
+        <p class="text-subtle">Esta cita se registró antes del flujo automático y no tiene historial.</p>
+      </ng-template>
+
+      <div class="form-actions" *ngIf="cancelable">
+        <button type="button" class="btn-op btn-op-cancel" (click)="cancelar()" [disabled]="cancelando">
+          {{ cancelando ? 'Cancelando…' : 'Cancelar cita' }}
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>

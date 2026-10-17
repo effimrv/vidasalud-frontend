@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
 import { describirErrorHttp } from '../shared/mensajes-error';
+import { estadoLegible, formatearFechaHoraCita, formatearPrecio, haceCuanto } from '../shared/formato';
 
 @Component({
   selector: 'app-admin-panel',
@@ -13,6 +14,15 @@ import { describirErrorHttp } from '../shared/mensajes-error';
 export class AdminPanelComponent implements OnInit {
   @Input() atenciones: Appointment[] = [];
   @Input() yo: UserProfile | null = null;
+  /** Texto de la última sincronización con el servidor ("hace 3 s"). */
+  @Input() sincronizado = '';
+  /** Pide a la vista contenedora abrir el detalle de una cita. */
+  @Output() verDetalle = new EventEmitter<number>();
+
+  readonly estadoLegible = estadoLegible;
+  readonly formatearPrecio = formatearPrecio;
+  readonly formatearFechaHoraCita = formatearFechaHoraCita;
+  readonly haceCuanto = haceCuanto;
 
   tabActiva: 'catalogo' | 'metricas' | 'supervision' | 'info' = 'catalogo';
 
@@ -257,24 +267,4 @@ export class AdminPanelComponent implements OnInit {
     return serv?.precio;
   }
 
-  formatearPrecio(valor?: number): string {
-    if (valor === undefined || valor === null) return '$0';
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      maximumFractionDigits: 0
-    }).format(valor);
-  }
-
-  formatearFechaHoraCita(fechaHora?: string): string {
-    if (!fechaHora) return 'Por confirmar';
-    try {
-      const d = new Date(fechaHora);
-      const dia = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
-      const hora = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
-      return `${dia}, ${hora} hrs`;
-    } catch {
-      return fechaHora;
-    }
-  }
 }

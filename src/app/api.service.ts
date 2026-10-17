@@ -14,15 +14,42 @@ export interface UserProfile {
   roles: string[];
 }
 
+export type EstadoAtencion = 'SOLICITADA' | 'CONFIRMADA' | 'EN_ESPERA' | 'EN_ATENCION' | 'CERRADA' | 'CANCELADA';
+
 export interface Appointment {
   id: number;
   pacienteNombre: string;
+  pacienteCorreo?: string;
   servicioId: number;
   boxId?: number;
-  estado: 'SOLICITADA' | 'CONFIRMADA' | 'EN_ESPERA' | 'EN_ATENCION' | 'CERRADA' | 'CANCELADA';
+  estado: EstadoAtencion;
   creadaEn?: string;
   /** Fecha y hora para la que se agendó la atención (distinto de creadaEn, que es cuándo se solicitó). */
   fechaHora?: string;
+  /** Último cambio de estado (lo registra el flujo automático o la recepción). */
+  actualizadaEn?: string;
+  /** Explicación del último cambio de estado. */
+  observacion?: string;
+  /** Reserva hecha por un paciente simulado de demostración. */
+  simulada?: boolean;
+}
+
+export interface CambioEstado {
+  estado: EstadoAtencion;
+  fecha: string;
+  responsable: string;
+  detalle?: string;
+}
+
+export interface DetalleAtencion extends Appointment {
+  historial: CambioEstado[];
+}
+
+export interface BloqueHorario {
+  hora: string;
+  disponible: boolean;
+  /** Por qué la hora no está disponible (reservada, bloqueada, ya pasó...). */
+  motivo?: string;
 }
 
 export interface ClinicalService {
@@ -72,8 +99,17 @@ export class ApiService {
     return this.cuandoMsalListo(() => this.http.post<Appointment>(`${this.base}/api/appointments`, cita));
   }
 
-  updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
+  updateAppointmentStatus(id: number, status: EstadoAtencion): Observable<Appointment> {
     return this.cuandoMsalListo(() => this.http.put<Appointment>(`${this.base}/api/appointments/${id}/status`, { status }));
+  }
+
+  getDetalleAtencion(id: number): Observable<DetalleAtencion> {
+    return this.cuandoMsalListo(() => this.http.get<DetalleAtencion>(`${this.base}/api/appointments/${id}`));
+  }
+
+  getDisponibilidad(servicioId: number, fecha: string): Observable<BloqueHorario[]> {
+    return this.cuandoMsalListo(() => this.http.get<BloqueHorario[]>(`${this.base}/api/appointments/disponibilidad`,
+      { params: { servicioId, fecha } }));
   }
 
   getCatalog(): Observable<ClinicalService[]> {
