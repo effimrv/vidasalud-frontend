@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
+import { describirErrorHttp } from '../shared/mensajes-error';
 
 @Component({
   selector: 'app-admin-panel',
@@ -48,14 +49,14 @@ export class AdminPanelComponent implements OnInit {
   cargarCatalogo(): void {
     this.api.getCatalog().subscribe({
       next: list => { this.catalogo = list || []; },
-      error: () => { this.errorMensaje = 'No se pudo cargar el catálogo de prestaciones.'; }
+      error: err => { this.errorMensaje = describirErrorHttp(err, 'cargar el catálogo de prestaciones'); }
     });
   }
 
   cargarInfo(): void {
     this.api.getInfoInstitucional().subscribe({
       next: info => { this.formInfo = info; },
-      error: () => { this.errorMensaje = 'No se pudo cargar la información del centro.'; }
+      error: err => { this.errorMensaje = describirErrorHttp(err, 'cargar la información del centro'); }
     });
   }
 
@@ -71,9 +72,9 @@ export class AdminPanelComponent implements OnInit {
         this.guardandoInfo = false;
         this.exitoMensaje = 'Información del centro actualizada con éxito.';
       },
-      error: () => {
+      error: err => {
         this.guardandoInfo = false;
-        this.errorMensaje = 'Ocurrió un error al guardar la información del centro.';
+        this.errorMensaje = describirErrorHttp(err, 'guardar la información del centro');
       }
     });
   }
@@ -136,9 +137,9 @@ export class AdminPanelComponent implements OnInit {
         this.modalAbierto = false;
         this.cargarCatalogo();
       },
-      error: () => {
+      error: err => {
         this.guardandoServicio = false;
-        this.errorMensaje = 'Ocurrió un error al guardar la especialidad. Inténtalo nuevamente.';
+        this.errorMensaje = describirErrorHttp(err, 'guardar la especialidad');
       }
     });
   }

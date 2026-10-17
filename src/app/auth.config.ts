@@ -6,3 +6,6 @@ export const bffUrl = 'https://dzv5td4m80.execute-api.us-east-1.amazonaws.com';
 
 /** Scopes que se piden al iniciar sesión, para obtener de una vez el ID token y el access token del BFF. */
 export const loginRequest = { scopes: [apiScope] };
+
+/** Igual que el login, pero abre directamente la pantalla de registro del flujo de autoservicio de Entra ID. */
+export const registroRequest = { scopes: [apiScope], prompt: 'create' };

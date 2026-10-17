@@ -291,6 +291,10 @@ html { scroll-behavior: smooth; }
 .alert-banner { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
 .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
 .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.login-alert { max-width: 1180px; margin: 16px auto 0; }
+.hero-signup { margin: 14px 0 0; font-size: 14px; color: #dceafb; }
+.hero-signup button { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: #ffffff; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.hero-signup button:hover { color: #bfe9e4; }
 .alert-close { background: transparent; border: 0; font-size: 20px; color: inherit; cursor: pointer; padding: 0 4px; line-height: 1; }
 
 /* Encabezado de Página */

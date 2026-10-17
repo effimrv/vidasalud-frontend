@@ -5,6 +5,7 @@ import { timeout, catchError, of } from 'rxjs';
 import { ApiService, Appointment, ClinicalService, InstitutionalInfo, UserProfile } from '../api.service';
 import { AdminPanelComponent } from '../admin/admin-panel.component';
 import { ESPECIALIDADES } from '../shared/especialidades';
+import { describirErrorHttp } from '../shared/mensajes-error';
 
 @Component({
   selector: 'app-appointments',
@@ -79,7 +80,10 @@ export class AppointmentsComponent implements OnInit {
           this.nuevoServicioId = this.catalogo[0].id;
         }
       },
-      error: err => console.warn('No se pudo cargar el catálogo:', err)
+      error: err => {
+        console.warn('No se pudo cargar el catálogo:', err);
+        this.errorMensaje ||= describirErrorHttp(err, 'cargar las especialidades disponibles');
+      }
     });
 
     this.api.getInfoInstitucional().subscribe({
@@ -100,7 +104,7 @@ export class AppointmentsComponent implements OnInit {
       },
       error: err => {
         console.warn('Error al cargar atenciones:', err);
-        this.errorMensaje = 'No se pudieron cargar las atenciones. Revisa tu conexión o sesión.';
+        this.errorMensaje = describirErrorHttp(err, 'cargar tus atenciones');
         this.actualizando = false;
       }
     });
@@ -333,7 +337,7 @@ export class AppointmentsComponent implements OnInit {
       error: err => {
         this.guardandoCita = false;
         console.error('Error al agendar cita:', err);
-        this.errorMensaje = 'Ocurrió un error al registrar la cita médica. Inténtalo nuevamente.';
+        this.errorMensaje = describirErrorHttp(err, 'registrar la cita médica');
       }
     });
   }
@@ -352,7 +356,9 @@ export class AppointmentsComponent implements OnInit {
       error: err => {
         this.procesandoId = null;
         console.error('Error al cambiar estado:', err);
-        this.errorMensaje = `No se pudo cambiar el estado de la atención #${id}. Verifica si la transición es permitida.`;
+        this.errorMensaje = err?.status === 400
+          ? `La atención #${id} no puede pasar a "${this.getEstadoLegible(nuevoEstado)}" desde su estado actual.`
+          : describirErrorHttp(err, `cambiar el estado de la atención #${id}`);
       }
     });
   }

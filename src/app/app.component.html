@@ -41,12 +41,18 @@
       <button class="button button-nav-quiet" (click)="pedirConfirmacionLogout()">Cerrar sesión</button>
     </ng-container>
     <ng-template #noLog>
+      <button class="button button-nav-quiet" (click)="registrarse()">Crear cuenta</button>
       <button class="button button-cta-nav" (click)="login()">
         <span aria-hidden="true">📅</span> Reservar hora
       </button>
     </ng-template>
   </span>
 </nav>
+
+<div *ngIf="errorLogin" class="alert-banner alert-error login-alert" role="alert">
+  <span>{{ errorLogin }}</span>
+  <button type="button" class="alert-close" aria-label="Cerrar aviso" (click)="errorLogin = ''">&times;</button>
+</div>
 
 <nav class="mega-nav" #megaNav *ngIf="!esAdmin">
   <div class="mega-nav-inner">

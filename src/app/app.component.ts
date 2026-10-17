@@ -5,7 +5,8 @@ import { CommonModule, ViewportScroller } from '@angular/common';
 import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
 import { AuthenticationResult, EventMessage, EventType, InteractionStatus } from '@azure/msal-browser';
 import { filter } from 'rxjs';
-import { loginRequest } from './auth.config';
+import { loginRequest, registroRequest } from './auth.config';
+import { describirErrorLogin } from './shared/mensajes-error';
 import { ESPECIALIDADES } from './shared/especialidades';
 
 @Component({
@@ -21,6 +22,8 @@ export class AppComponent implements OnInit {
   menuAbierto: string | null = null;
   modoOscuro = false;
   mostrarConfirmacionLogout = false;
+  /** Mensaje cuando el login o el registro en Entra ID no terminó bien (cancelado, cuenta no registrada, etc.). */
+  errorLogin = '';
 
   constructor(
     private msal: MsalService,
@@ -36,7 +39,12 @@ export class AppComponent implements OnInit {
     this.viewportScroller.setOffset([0, 150]);
 
     // Procesa la respuesta del redirect de Entra ID (login o renovación interactiva del token).
-    this.msal.handleRedirectObservable().subscribe();
+    this.msal.handleRedirectObservable().subscribe({
+      error: err => {
+        console.warn('El inicio de sesión no se completó:', err);
+        this.errorLogin = describirErrorLogin(err);
+      }
+    });
 
     this.msalBroadcast.msalSubject$.pipe(
       filter((msg: EventMessage) =>
@@ -45,6 +53,7 @@ export class AppComponent implements OnInit {
     ).subscribe((msg: EventMessage) => {
       const resultado = msg.payload as AuthenticationResult;
       this.msal.instance.setActiveAccount(resultado.account);
+      this.errorLogin = '';
       if (msg.eventType === EventType.LOGIN_SUCCESS) {
         // Venimos de un login recién completado: llevamos al usuario directo a su portal,
         // en vez de dejarlo en la página principal de marketing.
@@ -98,6 +107,10 @@ export class AppComponent implements OnInit {
 
   login(): void {
     this.msal.loginRedirect(loginRequest);
+  }
+
+  registrarse(): void {
+    this.msal.loginRedirect(registroRequest);
   }
 
   pedirConfirmacionLogout(): void {

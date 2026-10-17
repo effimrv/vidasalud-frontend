@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MsalService } from '@azure/msal-angular';
 import { ESPECIALIDADES } from '../shared/especialidades';
 import { ApiService, InstitutionalInfo } from '../api.service';
-import { loginRequest } from '../auth.config';
+import { loginRequest, registroRequest } from '../auth.config';
 
 @Component({
   selector: 'app-home',
@@ -44,6 +44,10 @@ import { loginRequest } from '../auth.config';
               </div>
               <span class="cta-arrow" aria-hidden="true">&#8594;</span>
             </button>
+            <p class="hero-signup">
+              ¿Primera vez en VidaSalud?
+              <button type="button" (click)="registrarse()">Crea tu cuenta de paciente</button>
+            </p>
             <div class="hero-trust-badges">
               <span><i class="check-icon">&#10003;</i> Citas 100% en línea</span>
               <span><i class="check-icon">&#10003;</i> Sin claves adicionales</span>
@@ -333,5 +337,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   login(): void {
     this.msal.loginRedirect(loginRequest);
+  }
+
+  registrarse(): void {
+    this.msal.loginRedirect(registroRequest);
   }
 }
