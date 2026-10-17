@@ -56,12 +56,13 @@ export function formatearFechaHoraSolicitud(instante?: string): string {
   return `${dia} a las ${hora} hrs`;
 }
 
-/** "hace 12 s", "hace 3 min", "hace 2 h" (o la fecha si pasó más de un día). */
+/** "hace instantes", "hace 12 s", "hace 3 min", "hace 2 h" (o la fecha si pasó más de un día). */
 export function haceCuanto(instante?: string, ahora: number = Date.now()): string {
   if (!instante) return '';
   const ms = ahora - new Date(instante).getTime();
   if (isNaN(ms)) return '';
   const segundos = Math.max(0, Math.round(ms / 1000));
+  if (segundos < 5) return 'hace instantes';
   if (segundos < 60) return `hace ${segundos} s`;
   const minutos = Math.round(segundos / 60);
   if (minutos < 60) return `hace ${minutos} min`;

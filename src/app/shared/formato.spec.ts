@@ -21,6 +21,7 @@ describe('formato', () => {
 
   it('describe cuánto tiempo pasó desde un cambio', () => {
     const ahora = Date.parse('2026-10-19T15:00:00Z');
+    expect(haceCuanto('2026-10-19T14:59:58Z', ahora)).toBe('hace instantes');
     expect(haceCuanto('2026-10-19T14:59:48Z', ahora)).toBe('hace 12 s');
     expect(haceCuanto('2026-10-19T14:57:00Z', ahora)).toBe('hace 3 min');
     expect(haceCuanto(undefined, ahora)).toBe('');
