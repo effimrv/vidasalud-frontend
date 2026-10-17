@@ -1,6 +1,6 @@
 # VidaSalud Frontend
 
-Frontend de VidaSalud construido con Angular 18. Permite iniciar sesión mediante Microsoft Entra ID, consultar las atenciones y consumir el backend a través de AWS API Gateway.
+Frontend de VidaSalud construido con Angular 18. Publicado en **https://e7u1iiqh4k.execute-api.us-east-1.amazonaws.com**. Permite iniciar sesión mediante Microsoft Entra ID, consultar las atenciones y consumir el backend a través de AWS API Gateway.
 
 ## Tecnologías
 
@@ -63,4 +63,4 @@ docker build -t vidasalud-frontend .
 docker run -d --name frontend -p 80:80 vidasalud-frontend
 ```
 
-En la nube se levanta desde el repo `vidasalud-infra` (servicio `frontend`), en la EC2, con CloudFront delante para HTTPS.
+En la nube se levanta desde el repo `vidasalud-infra` (servicio `frontend`) en la EC2, con un API Gateway delante para HTTPS: **https://e7u1iiqh4k.execute-api.us-east-1.amazonaws.com**
