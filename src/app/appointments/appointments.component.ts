@@ -65,8 +65,8 @@ export class AppointmentsComponent implements OnInit {
   filtroEstado = 'TODAS';
   terminoBusqueda = '';
 
-  // Filtro de estado (paciente)
-  filtroEstadoPaciente = 'TODAS';
+  // Filtro del paciente: citas próximas (en curso), finalizadas o canceladas
+  filtroPaciente: 'PROXIMAS' | 'FINALIZADAS' | 'CANCELADAS' = 'PROXIMAS';
   mostrarTodasMisAtenciones = false;
   readonly limiteMisAtenciones = 3;
 
@@ -208,10 +208,7 @@ export class AppointmentsComponent implements OnInit {
   }
 
   get misAtencionesFiltradas(): Appointment[] {
-    if (this.filtroEstadoPaciente === 'TODAS') {
-      return this.misAtenciones;
-    }
-    return this.misAtenciones.filter(a => a.estado === this.filtroEstadoPaciente);
+    return this.misAtenciones.filter(a => this.grupoPaciente(a) === this.filtroPaciente);
   }
 
   get misAtencionesVisibles(): Appointment[] {
@@ -220,13 +217,19 @@ export class AppointmentsComponent implements OnInit {
       : this.misAtencionesFiltradas.slice(0, this.limiteMisAtenciones);
   }
 
-  countMisAtencionesPorEstado(estado: string): number {
-    return this.misAtenciones.filter(a => a.estado === estado).length;
+  countMisAtenciones(grupo: 'PROXIMAS' | 'FINALIZADAS' | 'CANCELADAS'): number {
+    return this.misAtenciones.filter(a => this.grupoPaciente(a) === grupo).length;
   }
 
-  seleccionarFiltroPaciente(estado: string): void {
-    this.filtroEstadoPaciente = estado;
+  seleccionarFiltroPaciente(grupo: 'PROXIMAS' | 'FINALIZADAS' | 'CANCELADAS'): void {
+    this.filtroPaciente = grupo;
     this.mostrarTodasMisAtenciones = false;
+  }
+
+  private grupoPaciente(a: Appointment): 'PROXIMAS' | 'FINALIZADAS' | 'CANCELADAS' {
+    if (a.estado === 'CERRADA') return 'FINALIZADAS';
+    if (a.estado === 'CANCELADA') return 'CANCELADAS';
+    return 'PROXIMAS';
   }
 
   get proximaAtencion(): Appointment | undefined {

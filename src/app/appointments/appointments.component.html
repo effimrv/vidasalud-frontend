@@ -177,28 +177,16 @@
       <span class="record-count">{{ misAtenciones.length }} citas</span>
     </div>
 
-    <!-- Pestañas de Filtro de Estado -->
+    <!-- Pestañas: próximas, finalizadas y canceladas -->
     <div class="status-tabs" *ngIf="misAtenciones.length > 0">
-      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'TODAS'" (click)="seleccionarFiltroPaciente('TODAS')">
-        Todas ({{ misAtenciones.length }})
+      <button type="button" class="tab-btn" [class.tab-active]="filtroPaciente === 'PROXIMAS'" (click)="seleccionarFiltroPaciente('PROXIMAS')">
+        Próximas ({{ countMisAtenciones('PROXIMAS') }})
       </button>
-      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'SOLICITADA'" (click)="seleccionarFiltroPaciente('SOLICITADA')">
-        Solicitadas ({{ countMisAtencionesPorEstado('SOLICITADA') }})
+      <button type="button" class="tab-btn" [class.tab-active]="filtroPaciente === 'FINALIZADAS'" (click)="seleccionarFiltroPaciente('FINALIZADAS')">
+        Finalizadas ({{ countMisAtenciones('FINALIZADAS') }})
       </button>
-      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'CONFIRMADA'" (click)="seleccionarFiltroPaciente('CONFIRMADA')">
-        Confirmadas ({{ countMisAtencionesPorEstado('CONFIRMADA') }})
-      </button>
-      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'EN_ESPERA'" (click)="seleccionarFiltroPaciente('EN_ESPERA')">
-        En Espera ({{ countMisAtencionesPorEstado('EN_ESPERA') }})
-      </button>
-      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'EN_ATENCION'" (click)="seleccionarFiltroPaciente('EN_ATENCION')">
-        En Consulta ({{ countMisAtencionesPorEstado('EN_ATENCION') }})
-      </button>
-      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'CERRADA'" (click)="seleccionarFiltroPaciente('CERRADA')">
-        Cerradas ({{ countMisAtencionesPorEstado('CERRADA') }})
-      </button>
-      <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoPaciente === 'CANCELADA'" (click)="seleccionarFiltroPaciente('CANCELADA')">
-        Canceladas ({{ countMisAtencionesPorEstado('CANCELADA') }})
+      <button type="button" class="tab-btn" [class.tab-active]="filtroPaciente === 'CANCELADAS'" (click)="seleccionarFiltroPaciente('CANCELADAS')">
+        Canceladas ({{ countMisAtenciones('CANCELADAS') }})
       </button>
     </div>
 
@@ -296,8 +284,8 @@
       <ng-template #sinResultadosFiltro>
         <div class="empty-state">
           <span class="empty-icon">🔎</span>
-          <h3>No tienes citas en este estado</h3>
-          <p>Prueba con otra pestaña para ver el resto de tus citas.</p>
+          <h3>{{ filtroPaciente === 'PROXIMAS' ? 'No tienes citas próximas' : filtroPaciente === 'FINALIZADAS' ? 'Aún no tienes atenciones finalizadas' : 'No tienes citas canceladas' }}</h3>
+          <p>{{ filtroPaciente === 'PROXIMAS' ? 'Agenda una nueva hora arriba o revisa tus atenciones finalizadas.' : 'Prueba con otra pestaña para ver el resto de tus citas.' }}</p>
         </div>
       </ng-template>
     </ng-template>
@@ -437,7 +425,7 @@
         [class.tab-active]="filtroEstado === 'SOLICITADA'"
         (click)="filtroEstado = 'SOLICITADA'"
       >
-        Solicitadas ({{ countPorEstado('SOLICITADA') }})
+        En revisión ({{ countPorEstado('SOLICITADA') }})
       </button>
       <button
         type="button"
@@ -469,7 +457,7 @@
         [class.tab-active]="filtroEstado === 'CERRADA'"
         (click)="filtroEstado = 'CERRADA'"
       >
-        Cerradas ({{ countPorEstado('CERRADA') }})
+        Finalizadas ({{ countPorEstado('CERRADA') }})
       </button>
       <button
         type="button"

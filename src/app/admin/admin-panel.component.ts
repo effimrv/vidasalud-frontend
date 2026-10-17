@@ -215,11 +215,11 @@ export class AdminPanelComponent implements OnInit {
 
   get citasPorEstado(): { estado: string; etiqueta: string; cantidad: number; porcentaje: number }[] {
     const estados: { estado: string; etiqueta: string }[] = [
-      { estado: 'SOLICITADA', etiqueta: 'Solicitadas' },
+      { estado: 'SOLICITADA', etiqueta: 'En revisión' },
       { estado: 'CONFIRMADA', etiqueta: 'Confirmadas' },
       { estado: 'EN_ESPERA', etiqueta: 'En Espera' },
       { estado: 'EN_ATENCION', etiqueta: 'En Consulta' },
-      { estado: 'CERRADA', etiqueta: 'Cerradas' },
+      { estado: 'CERRADA', etiqueta: 'Finalizadas' },
       { estado: 'CANCELADA', etiqueta: 'Canceladas' }
     ];
 

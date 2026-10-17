@@ -189,7 +189,7 @@
       Todas ({{ atenciones.length }})
     </button>
     <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'SOLICITADA'" (click)="filtroEstadoSupervision = 'SOLICITADA'">
-      Solicitadas ({{ countPorEstado('SOLICITADA') }})
+      En revisión ({{ countPorEstado('SOLICITADA') }})
     </button>
     <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'CONFIRMADA'" (click)="filtroEstadoSupervision = 'CONFIRMADA'">
       Confirmadas ({{ countPorEstado('CONFIRMADA') }})
@@ -201,7 +201,7 @@
       En Consulta ({{ countPorEstado('EN_ATENCION') }})
     </button>
     <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'CERRADA'" (click)="filtroEstadoSupervision = 'CERRADA'">
-      Cerradas ({{ countPorEstado('CERRADA') }})
+      Finalizadas ({{ countPorEstado('CERRADA') }})
     </button>
     <button type="button" class="tab-btn" [class.tab-active]="filtroEstadoSupervision === 'CANCELADA'" (click)="filtroEstadoSupervision = 'CANCELADA'">
       Canceladas ({{ countPorEstado('CANCELADA') }})
