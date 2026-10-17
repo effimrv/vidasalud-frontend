@@ -53,3 +53,14 @@ src/app/
 La URL del backend se configura en `src/app/api.service.ts` y utiliza `GET /api/me`, `GET /api/appointments` y `GET /api/catalog/services`.
 
 No se deben publicar secretos, contraseñas ni tokens en este repositorio.
+
+## Despliegue con Docker
+
+`Dockerfile` compila Angular en modo producción y lo sirve con nginx (`nginx.conf`). Todas las rutas de Angular responden `index.html`, e `index.html` no se guarda en caché.
+
+```bash
+docker build -t vidasalud-frontend .
+docker run -d --name frontend -p 80:80 vidasalud-frontend
+```
+
+En la nube se levanta desde el repo `vidasalud-infra` (servicio `frontend`), en la EC2, con CloudFront delante para HTTPS.
