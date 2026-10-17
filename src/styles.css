@@ -256,6 +256,7 @@ html { scroll-behavior: smooth; }
 .info-detail-item span { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
 /* Página "Nosotros" */
+.about-hero { justify-content: space-between; }
 .hero-trust-badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; max-width: 560px; }
 .trust-badge { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .2); border-radius: 20px; font-size: 13px; font-weight: 600; color: #dceafb; white-space: nowrap; }
 .about-hero-visual { width: 260px; }
@@ -580,6 +581,8 @@ body.dark-mode a:focus-visible, body.dark-mode button:focus-visible, body.dark-m
 	.values-grid { grid-template-columns: repeat(2, 1fr); }
 	.form-grid { grid-template-columns: 1fr; }
 	.hero-visual { width: 260px; }
+	.about-hero { justify-content: flex-start; }
+	.about-hero .hero-visual { align-self: center; margin-top: 24px; }
 	.hero-badge-card { right: -6px; }
 	.showcase-grid { grid-template-columns: 1fr; }
 	.showcase-card-tall { min-height: 220px; }
