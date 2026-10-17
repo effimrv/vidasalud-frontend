@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { MsalService } from '@azure/msal-angular';
-import { InteractionRequiredAuthError } from '@azure/msal-browser';
-import { from, Observable, of, switchMap, catchError, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { MsalBroadcastService } from '@azure/msal-angular';
+import { InteractionStatus } from '@azure/msal-browser';
+import { filter, Observable, switchMap, take } from 'rxjs';
+import { bffUrl } from './auth.config';
 
 export interface UserProfile {
   nombre: string;
@@ -40,75 +41,52 @@ export interface InstitutionalInfo {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private base = 'https://dzv5td4m80.execute-api.us-east-1.amazonaws.com';
-  private scope = 'api://2c70c5bc-6b56-4564-bca4-ec0821f3cefa/access_as_user';
+  private base = bffUrl;
 
-  constructor(private http: HttpClient, private msal: MsalService) {}
+  /**
+   * Emite una vez cuando MSAL no tiene ninguna interacción en curso (login, redirect o renovación de token).
+   * El token Bearer lo adjunta y renueva MsalInterceptor; aquí solo evitamos disparar llamadas mientras MSAL
+   * todavía está procesando el redirect, que era lo que hacía que a veces la petición saliera sin token.
+   */
+  private msalListo$: Observable<unknown>;
 
-  private getHeaders(): Observable<HttpHeaders> {
-    const cuenta = this.msal.instance.getActiveAccount()
-      ?? this.msal.instance.getAllAccounts()[0];
-
-    if (!cuenta) {
-      return throwError(() => new Error('No hay sesión de usuario activa'));
-    }
-
-    return from(
-      this.msal.instance.acquireTokenSilent({ scopes: [this.scope], account: cuenta })
-    ).pipe(
-      catchError(err => {
-        if (err instanceof InteractionRequiredAuthError) {
-          this.msal.loginRedirect();
-        }
-        return throwError(() => err);
-      }),
-      switchMap(result => of(new HttpHeaders({
-        Authorization: 'Bearer ' + result.accessToken,
-        'Content-Type': 'application/json'
-      })))
+  constructor(private http: HttpClient, msalBroadcast: MsalBroadcastService) {
+    this.msalListo$ = msalBroadcast.inProgress$.pipe(
+      filter(estado => estado === InteractionStatus.None),
+      take(1)
     );
+  }
+
+  private cuandoMsalListo<T>(peticion: () => Observable<T>): Observable<T> {
+    return this.msalListo$.pipe(switchMap(peticion));
   }
 
   getAppointments(): Observable<Appointment[]> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.get<Appointment[]>(`${this.base}/api/appointments`, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.get<Appointment[]>(`${this.base}/api/appointments`));
   }
 
   createAppointment(cita: { pacienteNombre: string; servicioId: number; boxId?: number; fechaHora?: string }): Observable<Appointment> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.post<Appointment>(`${this.base}/api/appointments`, cita, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.post<Appointment>(`${this.base}/api/appointments`, cita));
   }
 
   updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.put<Appointment>(`${this.base}/api/appointments/${id}/status`, { status }, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.put<Appointment>(`${this.base}/api/appointments/${id}/status`, { status }));
   }
 
   getCatalog(): Observable<ClinicalService[]> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.get<ClinicalService[]>(`${this.base}/api/catalog/services`, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.get<ClinicalService[]>(`${this.base}/api/catalog/services`));
   }
 
   createService(data: { nombre: string; precio: number; boxId?: number; cuposDisponibles: number }): Observable<ClinicalService> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.post<ClinicalService>(`${this.base}/api/catalog/services`, data, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.post<ClinicalService>(`${this.base}/api/catalog/services`, data));
   }
 
   updateService(id: number, data: Partial<ClinicalService>): Observable<ClinicalService> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.put<ClinicalService>(`${this.base}/api/catalog/services/${id}`, data, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.put<ClinicalService>(`${this.base}/api/catalog/services/${id}`, data));
   }
 
   getMe(): Observable<UserProfile> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.get<UserProfile>(`${this.base}/api/me`, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.get<UserProfile>(`${this.base}/api/me`));
   }
 
   /** Información institucional del centro: lectura pública, sin requerir sesión activa. */
@@ -117,8 +95,6 @@ export class ApiService {
   }
 
   actualizarInfoInstitucional(data: Partial<InstitutionalInfo>): Observable<InstitutionalInfo> {
-    return this.getHeaders().pipe(
-      switchMap(headers => this.http.put<InstitutionalInfo>(`${this.base}/api/info`, data, { headers }))
-    );
+    return this.cuandoMsalListo(() => this.http.put<InstitutionalInfo>(`${this.base}/api/info`, data));
   }
 }

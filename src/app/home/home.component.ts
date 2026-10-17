@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MsalService } from '@azure/msal-angular';
 import { ESPECIALIDADES } from '../shared/especialidades';
 import { ApiService, InstitutionalInfo } from '../api.service';
+import { loginRequest } from '../auth.config';
 
 @Component({
   selector: 'app-home',
@@ -331,6 +332,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   login(): void {
-    this.msal.loginRedirect();
+    this.msal.loginRedirect(loginRequest);
   }
 }

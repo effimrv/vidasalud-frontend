@@ -1,7 +1,11 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { MsalService } from '@azure/msal-angular';
+import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
+import { AuthenticationResult, EventMessage, EventType, InteractionStatus } from '@azure/msal-browser';
+import { filter } from 'rxjs';
+import { loginRequest } from './auth.config';
 import { ESPECIALIDADES } from './shared/especialidades';
 
 @Component({
@@ -18,24 +22,41 @@ export class AppComponent implements OnInit {
   modoOscuro = false;
   mostrarConfirmacionLogout = false;
 
-  constructor(private msal: MsalService, private router: Router, private viewportScroller: ViewportScroller) {}
+  constructor(
+    private msal: MsalService,
+    private msalBroadcast: MsalBroadcastService,
+    private router: Router,
+    private viewportScroller: ViewportScroller,
+    private destroyRef: DestroyRef
+  ) {}
 
   ngOnInit(): void {
     // Compensa el header fijo (topbar + mega-nav) al hacer scroll a un ancla, ya que Angular
     // calcula la posición manualmente y no respeta scroll-margin-top del CSS.
     this.viewportScroller.setOffset([0, 150]);
 
-    this.msal.instance.handleRedirectPromise().then(result => {
-      if (result?.account) {
-        this.msal.instance.setActiveAccount(result.account);
+    // Procesa la respuesta del redirect de Entra ID (login o renovación interactiva del token).
+    this.msal.handleRedirectObservable().subscribe();
+
+    this.msalBroadcast.msalSubject$.pipe(
+      filter((msg: EventMessage) =>
+        msg.eventType === EventType.LOGIN_SUCCESS || msg.eventType === EventType.ACQUIRE_TOKEN_SUCCESS),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((msg: EventMessage) => {
+      const resultado = msg.payload as AuthenticationResult;
+      this.msal.instance.setActiveAccount(resultado.account);
+      if (msg.eventType === EventType.LOGIN_SUCCESS) {
         // Venimos de un login recién completado: llevamos al usuario directo a su portal,
         // en vez de dejarlo en la página principal de marketing.
         this.router.navigateByUrl('/appointments');
-      } else {
-        const cuentas = this.msal.instance.getAllAccounts();
-        if (cuentas.length > 0) this.msal.instance.setActiveAccount(cuentas[0]);
       }
     });
+
+    // Cada vez que MSAL termina una interacción (o se cierra sesión en otra pestaña) se revalida la cuenta activa.
+    this.msalBroadcast.inProgress$.pipe(
+      filter((estado: InteractionStatus) => estado === InteractionStatus.None),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => this.asegurarCuentaActiva());
 
     this.modoOscuro = localStorage.getItem('vidasalud-modo-oscuro') === '1';
     document.body.classList.toggle('dark-mode', this.modoOscuro);
@@ -68,8 +89,15 @@ export class AppComponent implements OnInit {
     return 'Paciente';
   }
 
+  private asegurarCuentaActiva(): void {
+    const cuentas = this.msal.instance.getAllAccounts();
+    if (!this.msal.instance.getActiveAccount() && cuentas.length > 0) {
+      this.msal.instance.setActiveAccount(cuentas[0]);
+    }
+  }
+
   login(): void {
-    this.msal.loginRedirect();
+    this.msal.loginRedirect(loginRequest);
   }
 
   pedirConfirmacionLogout(): void {
@@ -82,7 +110,7 @@ export class AppComponent implements OnInit {
 
   confirmarLogout(): void {
     this.mostrarConfirmacionLogout = false;
-    this.msal.logoutRedirect();
+    this.msal.logoutRedirect({ account: this.msal.instance.getActiveAccount() });
   }
 
   toggleModoOscuro(): void {

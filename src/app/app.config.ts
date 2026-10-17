@@ -8,14 +8,10 @@ import {
 import {
   MsalInterceptor, MsalService, MsalGuard, MsalBroadcastService,
   MSAL_INSTANCE, MSAL_GUARD_CONFIG, MSAL_INTERCEPTOR_CONFIG,
-  MsalGuardConfiguration, MsalInterceptorConfiguration
+  MsalGuardConfiguration, MsalInterceptorConfiguration, ProtectedResourceScopes
 } from '@azure/msal-angular';
 import { routes } from './app.routes';
-
-const clientId = '2c70c5bc-6b56-4564-bca4-ec0821f3cefa';
-const tenantId = '49cd374a-62d5-4d3d-851e-69058d58e3b5';
-const apiScope = 'api://2c70c5bc-6b56-4564-bca4-ec0821f3cefa/access_as_user';
-const bffUrl = 'https://dzv5td4m80.execute-api.us-east-1.amazonaws.com';
+import { clientId, tenantId, apiScope, bffUrl, loginRequest } from './auth.config';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
@@ -32,14 +28,23 @@ export function MSALInstanceFactory(): IPublicClientApplication {
 export function MSALGuardConfigFactory(): MsalGuardConfiguration {
   return {
     interactionType: InteractionType.Redirect,
-    authRequest: { scopes: [apiScope] }
+    authRequest: loginRequest
   };
 }
 
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
-  const protectedResourceMap = new Map<string, Array<string>>();
-  protectedResourceMap.set(`${bffUrl}/api/*`, [apiScope]);
-  protectedResourceMap.set('http://localhost:8080/api/*', [apiScope]);
+  // MSAL usa la primera ruta que calce, así que las excepciones públicas van antes del comodín /api/*.
+  // GET /api/info y /api/health son públicos: no deben pedir token (si no, un visitante sin sesión es
+  // redirigido al login). PUT /api/info sí requiere token de Admin.
+  const protectedResourceMap = new Map<string, Array<string | ProtectedResourceScopes> | null>();
+  for (const base of [bffUrl, 'http://localhost:8080']) {
+    protectedResourceMap.set(`${base}/api/info`, [
+      { httpMethod: 'GET', scopes: null },
+      { httpMethod: 'PUT', scopes: [apiScope] }
+    ]);
+    protectedResourceMap.set(`${base}/api/health`, null);
+    protectedResourceMap.set(`${base}/api/*`, [apiScope]);
+  }
   return {
     interactionType: InteractionType.Redirect,
     protectedResourceMap
@@ -59,7 +64,11 @@ export const appConfig: ApplicationConfig = {
     MsalBroadcastService,
     {
       provide: APP_INITIALIZER,
-      useFactory: (msal: MsalService) => () => msal.instance.initialize(),
+      useFactory: (msal: MsalService) => async () => {
+        await msal.instance.initialize();
+        // Sincroniza el login/logout entre pestañas abiertas de la app.
+        msal.instance.enableAccountStorageEvents();
+      },
       deps: [MsalService],
       multi: true
     }
