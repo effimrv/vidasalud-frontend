@@ -1,7 +1,10 @@
 <div class="modal-overlay" (click)="cerrar.emit()">
   <div class="modal-card modal-detalle" role="dialog" aria-modal="true" aria-labelledby="titulo-detalle" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3 id="titulo-detalle">Cita #{{ atencionId }}</h3>
+    <div class="modal-header detalle-cabecera">
+      <div>
+        <h3 id="titulo-detalle">Cita #{{ atencionId }}</h3>
+        <p class="detalle-subtitulo" *ngIf="detalle as d">{{ nombreServicio }} · {{ formatearFechaHoraCita(d.fechaHora) }}</p>
+      </div>
       <button type="button" class="alert-close" aria-label="Cerrar detalle" (click)="cerrar.emit()">&times;</button>
     </div>
 
@@ -17,43 +20,41 @@
         <span class="en-vivo" *ngIf="d.estado !== 'CERRADA' && d.estado !== 'CANCELADA'">En vivo</span>
         <small class="text-subtle" *ngIf="d.actualizadaEn">Actualizado {{ haceCuanto(d.actualizadaEn) }}</small>
       </div>
-      <p class="detalle-observacion" *ngIf="d.observacion">{{ d.observacion }}</p>
 
       <app-progreso-cita [estado]="d.estado"></app-progreso-cita>
 
-      <div class="detalle-grid">
-        <section>
-          <h4>Paciente</h4>
-          <dl>
-            <dt>Nombre</dt>
-            <dd>
-              {{ d.pacienteNombre }}
-              <span class="tag-simulado" *ngIf="vistaPersonal && d.simulada" title="Reserva generada por la demanda simulada">Simulado</span>
-            </dd>
-            <ng-container *ngIf="vistaPersonal">
-              <dt>Correo</dt>
-              <dd>{{ d.pacienteCorreo || 'No registrado' }}</dd>
-            </ng-container>
-          </dl>
-        </section>
-        <section>
-          <h4>Cita</h4>
-          <dl>
-            <dt>Prestación</dt>
-            <dd>{{ nombreServicio }}</dd>
-            <dt>Valor</dt>
-            <dd>{{ precio }}</dd>
-            <ng-container *ngIf="d.boxId">
-              <dt>Box</dt>
-              <dd>Box {{ d.boxId }}</dd>
-            </ng-container>
-            <dt>Agendada para</dt>
-            <dd>{{ formatearFechaHoraCita(d.fechaHora) }}</dd>
-            <dt>Solicitada</dt>
-            <dd>{{ formatearFechaHoraSolicitud(d.creadaEn) }}</dd>
-          </dl>
-        </section>
-      </div>
+      <p class="detalle-observacion" *ngIf="d.observacion">{{ d.observacion }}</p>
+
+      <dl class="detalle-datos">
+        <div class="dato">
+          <dt>Paciente</dt>
+          <dd>
+            {{ d.pacienteNombre }}
+            <span class="tag-simulado" *ngIf="vistaPersonal && d.simulada" title="Reserva generada por la demanda simulada">Simulado</span>
+          </dd>
+          <dd class="dato-secundario" *ngIf="vistaPersonal && d.pacienteCorreo">{{ d.pacienteCorreo }}</dd>
+        </div>
+        <div class="dato">
+          <dt>Prestación</dt>
+          <dd>{{ nombreServicio }}</dd>
+        </div>
+        <div class="dato">
+          <dt>Agendada para</dt>
+          <dd>{{ formatearFechaHoraCita(d.fechaHora) }}</dd>
+        </div>
+        <div class="dato">
+          <dt>Box</dt>
+          <dd>{{ d.boxId ? 'Box ' + d.boxId : 'Por asignar' }}</dd>
+        </div>
+        <div class="dato">
+          <dt>Valor</dt>
+          <dd>{{ precio }}</dd>
+        </div>
+        <div class="dato">
+          <dt>Solicitada</dt>
+          <dd>{{ formatearFechaHoraSolicitud(d.creadaEn) }}</dd>
+        </div>
+      </dl>
 
       <h4 class="historial-titulo">Historial de la cita</h4>
       <ol class="historial" *ngIf="d.historial.length > 0; else sinHistorial">

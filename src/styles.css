@@ -456,14 +456,16 @@ tr:last-child td { border-bottom: 0; }
 /* Detalle de una cita */
 .modal-detalle { max-width: 720px; }
 .detalle-cargando { display: flex; align-items: center; gap: 10px; color: var(--muted); padding: 20px 0; }
+.detalle-cabecera { align-items: flex-start; margin-bottom: 12px; }
+.detalle-subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
 .detalle-estado { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.detalle-observacion { margin: 10px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--surface-alt); color: var(--ink); font-size: 14px; }
-.detalle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
-.detalle-grid section { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.detalle-observacion { margin: 6px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--surface-alt); color: var(--ink); font-size: 14px; }
+.detalle-datos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 0; }
+.dato { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.dato dt { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+.dato dd { margin: 4px 0 0; font-size: 14px; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.dato .dato-secundario { margin-top: 2px; font-size: 12px; font-weight: 500; color: var(--muted); }
 .modal-detalle h4 { margin: 0 0 10px; font: 700 14px 'Space Grotesk'; color: var(--heading); text-transform: uppercase; letter-spacing: .4px; }
-.detalle-grid dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
-.detalle-grid dt { color: var(--muted); }
-.detalle-grid dd { margin: 0; color: var(--ink); font-weight: 600; }
 .tag-simulado { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--chip); color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; vertical-align: middle; }
 .historial-titulo { margin-top: 20px !important; }
 .historial { list-style: none; margin: 0; padding: 0; }
@@ -476,7 +478,7 @@ tr:last-child td { border-bottom: 0; }
 .historial small { display: block; font-size: 12px; color: var(--muted); }
 .historial p { margin: 4px 0 0; font-size: 13px; color: var(--ink); }
 @media (max-width: 640px) {
-	.detalle-grid { grid-template-columns: 1fr; }
+	.detalle-datos { grid-template-columns: repeat(2, 1fr); }
 	.progreso-etiqueta { font-size: 10px; }
 	.avisos-vivo { left: 16px; right: 16px; max-width: none; }
 }
