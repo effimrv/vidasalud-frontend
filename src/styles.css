@@ -679,7 +679,7 @@ tr:last-child td { border-bottom: 0; }
   max-width: 94%;
   height: 240px;
   margin-top: -120px;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + 200px));
   pointer-events: none;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='240' viewBox='0 0 800 240'%3E%3Cpath d='M0,120 H38 L115,120 L128,96 L173,163 L237,24 L303,192 L346,90 L380,150 L394,120 H800' fill='none' stroke='%232a9d8f' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   z-index: 0;
