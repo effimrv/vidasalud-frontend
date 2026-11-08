@@ -678,8 +678,8 @@ tr:last-child td { border-bottom: 0; }
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='120' viewBox='0 0 360 120'%3E%3Cpath d='M0,70 H110 L124,70 L134,40 L146,96 L158,20 L170,80 L182,70 H360' fill='none' stroke='%232a9d8f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' opacity='0.22'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: min(720px, 90%) auto;
+  background-position: center 58%;
+  background-size: min(980px, 100%) auto;
   z-index: 0;
 }
 .hero-panel > * { position: relative; z-index: 1; }
