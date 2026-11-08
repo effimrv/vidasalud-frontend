@@ -94,9 +94,9 @@ export class AppComponent implements OnInit {
     return this.roles.includes('Auditor') && !this.esAdmin;
   }
 
-  /** Admin y Auditor pueden abrir la vista de auditoría. */
+  /** Solo el Admin ve el botón: el auditor ya está en la auditoría. */
   get puedeVerAuditoria(): boolean {
-    return this.roles.includes('Admin') || this.roles.includes('Auditor');
+    return this.roles.includes('Admin');
   }
 
   get etiquetaRol(): string {
