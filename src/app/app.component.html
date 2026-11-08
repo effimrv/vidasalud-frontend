@@ -25,6 +25,9 @@
           {{ etiquetaRol }}
         </span>
       </span>
+      <a class="button button-nav-quiet" *ngIf="esAdmin" routerLink="/appointments">
+        <span aria-hidden="true">🗂️</span> Panel
+      </a>
       <a class="button button-nav-quiet" *ngIf="puedeVerAuditoria" routerLink="/audit">
         <span aria-hidden="true">🔎</span> Auditoría
       </a>
