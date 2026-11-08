@@ -689,4 +689,4 @@ tr:last-child td { border-bottom: 0; }
 .about-banner-img { display: block; width: 100%; height: auto; aspect-ratio: 8 / 3; object-fit: cover; object-position: center; margin: 0 auto; }
 .about-banner-texto { max-width: 720px; margin: 8px auto 0; color: #3d5a6a; font-size: 17px; line-height: 1.6; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
+.about-descripcion { max-width: 760px; margin: 28px auto 8px; text-align: center; color: #3d5a6a; font-size: 17px; line-height: 1.6; }
