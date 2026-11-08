@@ -45,6 +45,20 @@ export interface DetalleAtencion extends Appointment {
   historial: CambioEstado[];
 }
 
+/** Un cambio de una cita en el timeline de auditoría (ms-audit). */
+export interface AuditEntrada {
+  citaId: number;
+  tipo: string;
+  estado: string;
+  servicioId?: number;
+  boxId?: number;
+  ocurridoEn: string;
+  /** Partición del tópico Kafka de donde llegó el evento (trazabilidad). */
+  particion: number;
+  /** Posición del evento dentro de esa partición. */
+  offset: number;
+}
+
 export interface BloqueHorario {
   hora: string;
   disponible: boolean;
@@ -126,6 +140,16 @@ export class ApiService {
 
   getMe(): Observable<UserProfile> {
     return this.cuandoMsalListo(() => this.http.get<UserProfile>(`${this.base}/api/me`));
+  }
+
+  /** Eventos más recientes de todas las citas (solo Admin y Auditor). */
+  getAuditEventos(limite = 200): Observable<AuditEntrada[]> {
+    return this.cuandoMsalListo(() => this.http.get<AuditEntrada[]>(`${this.base}/api/audit/eventos`, { params: { limite } }));
+  }
+
+  /** Timeline de una cita en orden cronológico (solo Admin y Auditor). */
+  getAuditTimeline(citaId: number): Observable<AuditEntrada[]> {
+    return this.cuandoMsalListo(() => this.http.get<AuditEntrada[]>(`${this.base}/api/audit/citas/${citaId}/timeline`));
   }
 
   /** Información institucional del centro: lectura pública, sin requerir sesión activa. */

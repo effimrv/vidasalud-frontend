@@ -22,7 +22,7 @@
     <span>VidaSalud</span>
   </a>
 
-  <form class="nav-search" *ngIf="!esAdmin" (submit)="buscar($event)">
+  <form class="nav-search" *ngIf="!esAdmin && !esAuditor" (submit)="buscar($event)">
     <span class="search-icon" aria-hidden="true">🔍</span>
     <input type="search" name="busqueda" placeholder="¿Qué estás buscando? Ej: Pediatría, Cardiología..." />
   </form>
@@ -35,7 +35,10 @@
           {{ etiquetaRol }}
         </span>
       </span>
-      <a class="button button-cta-nav" *ngIf="!esAdmin" routerLink="appointments">
+      <a class="button button-nav-quiet" *ngIf="puedeVerAuditoria" routerLink="/audit">
+        <span aria-hidden="true">🔎</span> Auditoría
+      </a>
+      <a class="button button-cta-nav" *ngIf="!esAdmin && !esAuditor" routerLink="appointments">
         <span aria-hidden="true">📅</span> Mis Atenciones
       </a>
       <button class="button button-nav-quiet" (click)="pedirConfirmacionLogout()">Cerrar sesión</button>
@@ -54,7 +57,7 @@
   <button type="button" class="alert-close" aria-label="Cerrar aviso" (click)="errorLogin = ''">&times;</button>
 </div>
 
-<nav class="mega-nav" #megaNav *ngIf="!esAdmin">
+<nav class="mega-nav" #megaNav *ngIf="!esAdmin && !esAuditor">
   <div class="mega-nav-inner">
     <div class="mega-item" [class.open]="menuAbierto === 'especialidades'">
       <button type="button" class="mega-trigger" (click)="toggleMenu('especialidades')">

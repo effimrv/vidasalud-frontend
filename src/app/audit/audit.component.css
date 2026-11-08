@@ -1,0 +1,9 @@
+.audit-toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin: 1rem 0; }
+.audit-toolbar label { display: flex; flex-direction: column; font-size: 0.85rem; gap: 0.25rem; }
+.audit-tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.audit-tabla th, .audit-tabla td { padding: 0.5rem; border-bottom: 1px solid var(--borde, #ddd); text-align: left; vertical-align: top; }
+.audit-cita-btn { background: none; border: none; color: inherit; text-decoration: underline; cursor: pointer; padding: 0; font: inherit; }
+.audit-origen { font-family: monospace; font-size: 0.8rem; color: #666; }
+.audit-timeline { margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--borde, #ddd); border-radius: 8px; }
+.audit-timeline-cabecera { display: flex; justify-content: space-between; align-items: center; }
+.audit-vacio { padding: 1rem 0; color: #666; }

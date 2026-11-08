@@ -92,6 +92,16 @@ export class AppComponent implements OnInit {
     return this.roles.some(r => r === 'Admin' || r === 'Recepcionista');
   }
 
+  /** El auditor solo consulta la trazabilidad: no tiene la vista de paciente ni la búsqueda de especialidades. */
+  get esAuditor(): boolean {
+    return this.roles.includes('Auditor') && !this.esAdmin;
+  }
+
+  /** Admin y Auditor pueden abrir la vista de auditoría. */
+  get puedeVerAuditoria(): boolean {
+    return this.roles.includes('Admin') || this.roles.includes('Auditor');
+  }
+
   get etiquetaRol(): string {
     if (this.roles.includes('Admin')) return 'Admin';
     if (this.roles.includes('Recepcionista')) return 'Recepcionista';
