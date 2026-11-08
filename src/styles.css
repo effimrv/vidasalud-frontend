@@ -111,7 +111,7 @@ a { color: inherit; text-decoration: none; }
 	background-size: auto, auto, 240px 80px;
 	pointer-events: none;
 }
-.hero-copy { flex: 1 1 480px; max-width: 640px; position: relative; z-index: 1; }
+.hero-copy { flex: 1 1 480px; max-width: 640px; position: relative; z-index: 1; margin-left: -90px; }
 .hero-copy h1 { max-width: 600px; margin: 10px 0 10px; font: 700 clamp(32px, 3.4vw, 52px)/1.1 'Space Grotesk', sans-serif; letter-spacing: -1.5px; }
 .hero-copy p { max-width: 560px; margin: 0; color: #3d5a6a; font-size: 17px; line-height: 1.6; }
 
