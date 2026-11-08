@@ -685,3 +685,9 @@ tr:last-child td { border-bottom: 0; }
 }
 .hero-panel > * { position: relative; z-index: 1; }
 
+/* Nosotros: banner de marca a ancho completo */
+.about-banner { max-width: 1200px; margin: 24px auto 8px; padding: 0 16px; text-align: center; }
+.about-banner-img { display: block; width: 100%; height: auto; }
+.about-banner-texto { max-width: 720px; margin: 8px auto 0; color: #3d5a6a; font-size: 17px; line-height: 1.6; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
