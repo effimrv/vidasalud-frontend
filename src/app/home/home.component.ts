@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit } from '@angula
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MsalService } from '@azure/msal-angular';
+import { Router } from '@angular/router';
 import { ESPECIALIDADES } from '../shared/especialidades';
 import { ApiService, InstitutionalInfo } from '../api.service';
 import { loginRequest, registroRequest } from '../auth.config';
@@ -22,10 +23,10 @@ import { loginRequest, registroRequest } from '../auth.config';
         <div *ngIf="logueada; else noLogueado" class="hero-logged-area">
           <div class="user-pill-hero">
             <span class="user-dot"></span>
-            <span>Sesión activa como <strong>{{ nombreUsuario }}</strong> ({{ esAdmin ? 'Administrador' : 'Paciente' }})</span>
+            <span>Sesión activa como <strong>{{ nombreUsuario }}</strong> ({{ etiquetaRol }})</span>
           </div>
           <a class="button button-primary" routerLink="/appointments">
-            {{ esAdmin ? 'Ir al Panel Operativo de la Clínica' : 'Ver mis atenciones y agendar hora' }}
+            {{ esAdmin ? 'Ir al Panel Operativo de la Clínica' : (esAuditor ? 'Ir a la auditoría' : 'Ver mis atenciones y agendar hora') }}
             <span class="button-arrow" aria-hidden="true">&#8594;</span>
           </a>
         </div>
@@ -257,10 +258,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private msal: MsalService,
     private host: ElementRef<HTMLElement>,
     private route: ActivatedRoute,
-    private api: ApiService
+    private api: ApiService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    if (this.logueada && this.esAuditor) {
+      this.router.navigateByUrl('/audit');
+      return;
+    }
     this.api.getInfoInstitucional().subscribe({
       next: info => this.infoInstitucional = info,
       error: err => console.warn('No se pudo cargar la información institucional:', err)
@@ -325,6 +331,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get esAdmin(): boolean {
     return this.roles.some(r => r === 'Admin' || r === 'Recepcionista');
+  }
+
+  /** El auditor no tiene vista de paciente: su inicio es la auditoría. */
+  get esAuditor(): boolean {
+    return this.roles.includes('Auditor') && !this.esAdmin;
+  }
+
+  get etiquetaRol(): string {
+    if (this.esAuditor) return 'Auditor';
+    return this.esAdmin ? 'Administrador' : 'Paciente';
   }
 
   login(): void {
