@@ -12,21 +12,34 @@
   <span>{{ error }}</span>
 </div>
 
+<div class="audit-resumen">
+  <div class="audit-tarjeta">
+    <span class="audit-tarjeta-etiqueta">Eventos registrados</span>
+    <strong class="audit-tarjeta-valor">{{ eventos.length }}</strong>
+  </div>
+  <div class="audit-tarjeta">
+    <span class="audit-tarjeta-etiqueta">Atenciones</span>
+    <strong class="audit-tarjeta-valor">{{ atencionesDistintas }}</strong>
+  </div>
+  <div class="audit-tarjeta">
+    <span class="audit-tarjeta-etiqueta">Última actualización</span>
+    <strong class="audit-tarjeta-valor audit-tarjeta-hora">{{ ultimaActualizacion ? (ultimaActualizacion | date: 'HH:mm:ss') : '—' }}</strong>
+    <small class="audit-tarjeta-nota">se refresca cada 10 s</small>
+  </div>
+</div>
+
 <div class="audit-toolbar">
   <label>
     Tipo de evento
     <select [(ngModel)]="filtroTipo" name="filtroTipo">
       <option value="TODOS">Todos</option>
-      <option *ngFor="let t of tipos" [value]="t">{{ etiquetaTipo(t) }}</option>
+      <option *ngFor="let t of tipos" [value]="t">{{ etiquetaEvento(t) }}</option>
     </select>
   </label>
   <label>
     Número de atención
     <input type="search" [(ngModel)]="filtroCita" name="filtroCita" placeholder="Ej: 584" />
   </label>
-  <small class="text-subtle" *ngIf="ultimaActualizacion">
-    Actualizado {{ ultimaActualizacion | date: 'HH:mm:ss' }} · se refresca cada 10 s
-  </small>
 </div>
 
 <p class="text-subtle" *ngIf="cargando">Cargando eventos…</p>
@@ -35,29 +48,31 @@
   No hay eventos que coincidan con el filtro.
 </p>
 
-<table class="audit-tabla" *ngIf="eventosFiltrados.length > 0">
-  <thead>
-    <tr>
-      <th>Fecha y hora</th>
-      <th>Atención</th>
-      <th>Evento</th>
-      <th>Estado resultante</th>
-      <th>Origen (Kafka)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let e of eventosFiltrados">
-      <td>{{ formatearFecha(e.ocurridoEn) }}</td>
-      <td>
-        <button type="button" class="audit-cita-btn" (click)="abrirTimeline(e.citaId)"
-                [attr.aria-label]="'Ver timeline de la atención ' + e.citaId">#{{ e.citaId }}</button>
-      </td>
-      <td>{{ etiquetaTipo(e.tipo) }}</td>
-      <td>{{ estadoLegible(e.estado) }}</td>
-      <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
-    </tr>
-  </tbody>
-</table>
+<div class="audit-tabla-wrap" *ngIf="eventosFiltrados.length > 0">
+  <table class="audit-tabla">
+    <thead>
+      <tr>
+        <th>Fecha y hora</th>
+        <th>Atención</th>
+        <th>Evento</th>
+        <th>Responsable</th>
+        <th>Origen (Kafka)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of eventosFiltrados">
+        <td class="audit-fecha">{{ formatearFecha(e.ocurridoEn) }}</td>
+        <td>
+          <button type="button" class="audit-cita-btn" (click)="abrirTimeline(e.citaId)"
+                  [attr.aria-label]="'Ver timeline de la atención ' + e.citaId">#{{ e.citaId }}</button>
+        </td>
+        <td><span class="audit-badge" [ngClass]="claseEvento(e.tipo)">{{ etiquetaEvento(e.tipo) }}</span></td>
+        <td>{{ e.responsable || '—' }}</td>
+        <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 <section class="audit-timeline" *ngIf="citaAbierta !== null" aria-live="polite">
   <div class="audit-timeline-cabecera">
@@ -71,17 +86,19 @@
     No hay eventos registrados para esta atención.
   </p>
 
-  <table class="audit-tabla" *ngIf="timeline.length > 0">
-    <thead>
-      <tr><th>Fecha y hora</th><th>Evento</th><th>Estado resultante</th><th>Origen (Kafka)</th></tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let e of timeline">
-        <td>{{ formatearFecha(e.ocurridoEn) }}</td>
-        <td>{{ etiquetaTipo(e.tipo) }}</td>
-        <td>{{ estadoLegible(e.estado) }}</td>
-        <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="audit-tabla-wrap" *ngIf="timeline.length > 0">
+    <table class="audit-tabla">
+      <thead>
+        <tr><th>Fecha y hora</th><th>Evento</th><th>Responsable</th><th>Origen (Kafka)</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of timeline">
+          <td class="audit-fecha">{{ formatearFecha(e.ocurridoEn) }}</td>
+          <td><span class="audit-badge" [ngClass]="claseEvento(e.tipo)">{{ etiquetaEvento(e.tipo) }}</span></td>
+          <td>{{ e.responsable || '—' }}</td>
+          <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </section>

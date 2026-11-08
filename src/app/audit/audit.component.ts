@@ -5,17 +5,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { ApiService, AuditEntrada } from '../api.service';
 import { describirErrorHttp } from '../shared/mensajes-error';
-import { estadoLegible } from '../shared/formato';
 
 /** Intervalo de actualización de los eventos recientes. */
 const REFRESCO_MS = 10000;
 
-/** Tipos de evento que existen en el ciclo de una cita. */
-const TIPOS_EVENTO = ['CREADA', 'CONFIRMADA', 'EN_ESPERA', 'EN_ATENCION', 'CERRADA', 'CANCELADA'];
+/** Eventos del ciclo de una atención, con su nombre para el personal y la clase de color. */
+const EVENTOS: Record<string, { etiqueta: string; clase: string }> = {
+  CREADA: { etiqueta: 'Solicitud en revisión', clase: 'ev-solicitud' },
+  CONFIRMADA: { etiqueta: 'Hora confirmada', clase: 'ev-confirmada' },
+  EN_ESPERA: { etiqueta: 'En sala de espera', clase: 'ev-espera' },
+  EN_ATENCION: { etiqueta: 'En consulta', clase: 'ev-atencion' },
+  CERRADA: { etiqueta: 'Atención finalizada', clase: 'ev-cerrada' },
+  CANCELADA: { etiqueta: 'Cancelada', clase: 'ev-cancelada' }
+};
 
 /**
- * Vista de auditoría (Admin y Auditor): solo lectura. Muestra los eventos recientes de todas las citas
- * y el timeline completo de una cita, con el origen de cada evento (partición y offset de Kafka).
+ * Vista de auditoría (Admin y Auditor): solo lectura. Muestra los cambios de las atenciones, quién los hizo
+ * y desde qué evento de Kafka llegó cada registro.
  */
 @Component({
   selector: 'app-audit',
@@ -25,13 +31,7 @@ const TIPOS_EVENTO = ['CREADA', 'CONFIRMADA', 'EN_ESPERA', 'EN_ATENCION', 'CERRA
   styleUrl: './audit.component.css'
 })
 export class AuditComponent implements OnInit {
-  readonly tipos = TIPOS_EVENTO;
-  readonly estadoLegible = estadoLegible;
-
-  /** El tipo CREADA es el evento de la solicitud inicial: se muestra como la solicitud en revisión. */
-  etiquetaTipo(tipo: string): string {
-    return tipo === 'CREADA' ? estadoLegible('SOLICITADA') : estadoLegible(tipo);
-  }
+  readonly tipos = Object.keys(EVENTOS);
 
   eventos: AuditEntrada[] = [];
   cargando = true;
@@ -69,11 +69,24 @@ export class AuditComponent implements OnInit {
     });
   }
 
+  /** Cantidad de atenciones distintas en los eventos cargados. */
+  get atencionesDistintas(): number {
+    return new Set(this.eventos.map(e => e.citaId)).size;
+  }
+
   get eventosFiltrados(): AuditEntrada[] {
     const cita = this.filtroCita.trim();
     return this.eventos.filter(e =>
       (this.filtroTipo === 'TODOS' || e.tipo === this.filtroTipo) &&
       (cita === '' || String(e.citaId).includes(cita)));
+  }
+
+  etiquetaEvento(tipo: string): string {
+    return EVENTOS[tipo]?.etiqueta ?? tipo;
+  }
+
+  claseEvento(tipo: string): string {
+    return EVENTOS[tipo]?.clase ?? 'ev-neutro';
   }
 
   abrirTimeline(citaId: number): void {
