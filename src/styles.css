@@ -687,7 +687,7 @@ tr:last-child td { border-bottom: 0; }
 
 /* Nosotros: banner de marca a ancho completo */
 .about-banner { width: 100%; margin: 28px 0 8px; background: #ffffff; border-radius: 20px; box-shadow: 0 16px 36px rgba(31, 59, 77, .10); overflow: hidden; box-sizing: border-box; }
-.about-banner-img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 1; object-fit: cover; object-position: center; margin: 0 auto; }
+.about-banner-img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 1; object-fit: cover; object-position: center bottom; margin: 0 auto; }
 .about-banner-texto { max-width: 720px; margin: 8px auto 0; color: #3d5a6a; font-size: 17px; line-height: 1.6; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
