@@ -673,13 +673,15 @@ tr:last-child td { border-bottom: 0; }
 .hero-panel::after {
   content: '';
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 77%;
+  width: 800px;
+  max-width: 94%;
+  height: 240px;
+  margin-top: -120px;
+  transform: translateX(-50%);
   pointer-events: none;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='120' viewBox='0 0 360 120'%3E%3Cpath d='M0,70 H110 L124,70 L134,40 L146,96 L158,20 L170,80 L182,70 H360' fill='none' stroke='%232a9d8f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' opacity='0.22'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center 68%;
-  background-size: min(720px, 90%) auto;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='240' viewBox='0 0 800 240'%3E%3Cpath d='M0,120 H200 Q220,98 240,120 L262,200 L287,30 L312,205 L332,120 H380 Q400,96 420,120 H800' fill='none' stroke='%232a9d8f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.35'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   z-index: 0;
 }
 .hero-panel > * { position: relative; z-index: 1; }
