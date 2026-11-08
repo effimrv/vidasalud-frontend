@@ -15,7 +15,7 @@ import { loginRequest, registroRequest } from '../auth.config';
     <section class="hero-panel">
       <div class="hero-copy">
         <span class="eyebrow">RED DE SALUD INTEGRAL</span>
-        <h1>Atención médica humana y conectada.</h1>
+        <h1>Tu salud, organizada en un solo lugar.</h1>
         <p>Agenda tu hora y sigue tus atenciones en línea.</p>
 
         <!-- CTA cuando está logueado -->
