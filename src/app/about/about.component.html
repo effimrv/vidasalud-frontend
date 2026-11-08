@@ -2,7 +2,6 @@
 <section class="about-banner">
   <h1 class="visually-hidden">{{ info?.titulo || 'Sobre VidaSalud' }}</h1>
   <img src="img-nosotros-banner.jpg" alt="VidaSalud: tu bienestar, nuestra prioridad. Centros médicos, especialistas certificados y reserva en línea" class="about-banner-img" />
-  <p class="about-banner-texto" *ngIf="info?.descripcion">{{ info?.descripcion }}</p>
 </section>
 
 <!-- Estadísticas de la red -->
@@ -19,6 +18,11 @@
     <strong>4</strong>
     <span>Roles trabajando coordinados: paciente, recepción, administración y auditoría</span>
   </article>
+</section>
+
+<!-- Descripción institucional, debajo de las estadísticas -->
+<section class="about-descripcion">
+  <p *ngIf="info?.descripcion">{{ info?.descripcion }}</p>
 </section>
 
 <!-- Nuestros valores -->
