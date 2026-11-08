@@ -14,8 +14,9 @@ import { loginRequest, registroRequest } from '../auth.config';
     <!-- Hero Principal -->
     <section class="hero-panel">
       <div class="hero-copy">
-        <h1>Tu salud, a un clic.</h1>
-        <p>Agenda tus horas y sigue tus atenciones en un solo lugar.</p>
+        <span class="eyebrow">RED DE SALUD INTEGRAL</span>
+        <h1>Atención médica humana y conectada.</h1>
+        <p>Agenda tu hora y sigue tus atenciones en línea.</p>
 
         <!-- CTA cuando está logueado -->
         <div *ngIf="logueada; else noLogueado" class="hero-logged-area">
@@ -54,6 +55,14 @@ import { loginRequest, registroRequest } from '../auth.config';
           <div class="emblem-ring ring-outer"></div>
           <div class="emblem-ring ring-inner"></div>
           <img src="logo.png" alt="Logo VidaSalud" class="emblem-logo" />
+        </div>
+        <div class="hero-badge-card">
+          <div class="badge-card-header">
+            <span class="live-dot"></span>
+            <span>Centro Médico Activo</span>
+          </div>
+          <strong>Consultas Disponibles Hoy</strong>
+          <small>Medicina general, kinesiología y pediatría</small>
         </div>
       </div>
     </section>
