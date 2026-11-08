@@ -3,9 +3,11 @@ import { MsalGuard } from '@azure/msal-angular';
 import { HomeComponent } from './home/home.component';
 import { AppointmentsComponent } from './appointments/appointments.component';
 import { AboutComponent } from './about/about.component';
+import { AuditComponent } from './audit/audit.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'nosotros', component: AboutComponent },
-  { path: 'appointments', component: AppointmentsComponent, canActivate: [MsalGuard] }
+  { path: 'appointments', component: AppointmentsComponent, canActivate: [MsalGuard] },
+  { path: 'audit', component: AuditComponent, canActivate: [MsalGuard] }
 ];

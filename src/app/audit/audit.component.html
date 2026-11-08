@@ -1,0 +1,87 @@
+<section class="dashboard-hero">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">AUDITORÍA · SOLO LECTURA</span>
+      <h1>Trazabilidad de atenciones</h1>
+      <p>Quién solicitó, confirmó, atendió o cerró cada atención, y desde qué evento del sistema llegó cada registro.</p>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="error" class="alert-banner alert-error" role="alert">
+  <span>{{ error }}</span>
+</div>
+
+<div class="audit-toolbar">
+  <label>
+    Tipo de evento
+    <select [(ngModel)]="filtroTipo" name="filtroTipo">
+      <option value="TODOS">Todos</option>
+      <option *ngFor="let t of tipos" [value]="t">{{ estadoLegible(t) }}</option>
+    </select>
+  </label>
+  <label>
+    Número de atención
+    <input type="search" [(ngModel)]="filtroCita" name="filtroCita" placeholder="Ej: 584" />
+  </label>
+  <small class="text-subtle" *ngIf="ultimaActualizacion">
+    Actualizado {{ ultimaActualizacion | date: 'HH:mm:ss' }} · se refresca cada 10 s
+  </small>
+</div>
+
+<p class="text-subtle" *ngIf="cargando">Cargando eventos…</p>
+
+<p class="audit-vacio" *ngIf="!cargando && eventosFiltrados.length === 0">
+  No hay eventos que coincidan con el filtro.
+</p>
+
+<table class="audit-tabla" *ngIf="eventosFiltrados.length > 0">
+  <thead>
+    <tr>
+      <th>Fecha y hora</th>
+      <th>Atención</th>
+      <th>Evento</th>
+      <th>Estado resultante</th>
+      <th>Origen (Kafka)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let e of eventosFiltrados">
+      <td>{{ formatearFecha(e.ocurridoEn) }}</td>
+      <td>
+        <button type="button" class="audit-cita-btn" (click)="abrirTimeline(e.citaId)"
+                [attr.aria-label]="'Ver timeline de la atención ' + e.citaId">#{{ e.citaId }}</button>
+      </td>
+      <td>{{ estadoLegible(e.tipo) }}</td>
+      <td>{{ estadoLegible(e.estado) }}</td>
+      <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<section class="audit-timeline" *ngIf="citaAbierta !== null" aria-live="polite">
+  <div class="audit-timeline-cabecera">
+    <h2>Timeline de la atención #{{ citaAbierta }}</h2>
+    <button type="button" class="button button-nav-quiet" (click)="cerrarTimeline()">Cerrar</button>
+  </div>
+
+  <p class="text-subtle" *ngIf="cargandoTimeline">Cargando timeline…</p>
+  <div class="alert-banner alert-error" *ngIf="errorTimeline"><span>{{ errorTimeline }}</span></div>
+  <p class="audit-vacio" *ngIf="!cargandoTimeline && !errorTimeline && timeline.length === 0">
+    No hay eventos registrados para esta atención.
+  </p>
+
+  <table class="audit-tabla" *ngIf="timeline.length > 0">
+    <thead>
+      <tr><th>Fecha y hora</th><th>Evento</th><th>Estado resultante</th><th>Origen (Kafka)</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of timeline">
+        <td>{{ formatearFecha(e.ocurridoEn) }}</td>
+        <td>{{ estadoLegible(e.tipo) }}</td>
+        <td>{{ estadoLegible(e.estado) }}</td>
+        <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
