@@ -14,12 +14,8 @@ import { loginRequest, registroRequest } from '../auth.config';
     <!-- Hero Principal -->
     <section class="hero-panel">
       <div class="hero-copy">
-        <span class="eyebrow">RED DE SALUD INTEGRAL · VIDA SALUD</span>
-        <h1>Atención médica más humana, ágil y conectada.</h1>
-        <p>
-          Gestiona tus consultas médicas, agenda horas con nuestros especialistas y realiza
-          el seguimiento de tus atenciones en un entorno clínico moderno y seguro.
-        </p>
+        <h1>Tu salud, a un clic.</h1>
+        <p>Agenda tus horas y sigue tus atenciones en un solo lugar.</p>
 
         <!-- CTA cuando está logueado -->
         <div *ngIf="logueada; else noLogueado" class="hero-logged-area">
@@ -48,11 +44,6 @@ import { loginRequest, registroRequest } from '../auth.config';
               ¿Primera vez en VidaSalud?
               <button type="button" (click)="registrarse()">Crea tu cuenta de paciente</button>
             </p>
-            <div class="hero-trust-badges">
-              <span><i class="check-icon">&#10003;</i> Citas 100% en línea</span>
-              <span><i class="check-icon">&#10003;</i> Sin claves adicionales</span>
-              <span><i class="check-icon">&#10003;</i> Datos médicos protegidos</span>
-            </div>
           </div>
         </ng-template>
       </div>
@@ -63,14 +54,6 @@ import { loginRequest, registroRequest } from '../auth.config';
           <div class="emblem-ring ring-outer"></div>
           <div class="emblem-ring ring-inner"></div>
           <img src="logo.png" alt="Logo VidaSalud" class="emblem-logo" />
-        </div>
-        <div class="hero-badge-card">
-          <div class="badge-card-header">
-            <span class="live-dot"></span>
-            <span>Centro Médico Activo</span>
-          </div>
-          <strong>Consultas Disponibles Hoy</strong>
-          <small>Medicina General · Kinesiología · Pediatría</small>
         </div>
       </div>
     </section>
