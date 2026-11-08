@@ -28,7 +28,8 @@ Matriz de funcionalidades y documentación del proyecto: [vidasalud-docs](https:
 
 **Recepción y administración**
 - Tabla de todas las citas actualizada cada 5 segundos, con filtros por estado, búsqueda y detalle de cada cita (paciente, correo, prestación, box, fecha e historial).
-- Administración: gestión de especialidades y precios, métricas, supervisión e información del centro.
+- Administración: gestión de especialidades y precios, métricas y supervisión de atenciones.
+- Auditoría (Admin y Auditor, solo lectura): trazabilidad de cada cambio de estado, con responsable y origen del evento en Kafka.
 
 La vista se elige según el rol que trae el token (`Admin`, `Recepcionista` o `Paciente`).
 
