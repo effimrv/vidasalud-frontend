@@ -20,7 +20,6 @@ export class AppComponent implements OnInit {
 
   especialidades = ESPECIALIDADES;
   menuAbierto: string | null = null;
-  modoOscuro = false;
   mostrarConfirmacionLogout = false;
   /** Mensaje cuando el login o el registro en Entra ID no terminó bien (cancelado, cuenta no registrada, etc.). */
   errorLogin = '';
@@ -67,8 +66,6 @@ export class AppComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => this.asegurarCuentaActiva());
 
-    this.modoOscuro = localStorage.getItem('vidasalud-modo-oscuro') === '1';
-    document.body.classList.toggle('dark-mode', this.modoOscuro);
   }
 
   get logueada(): boolean {
@@ -135,12 +132,6 @@ export class AppComponent implements OnInit {
   confirmarLogout(): void {
     this.mostrarConfirmacionLogout = false;
     this.msal.logoutRedirect({ account: this.msal.instance.getActiveAccount() });
-  }
-
-  toggleModoOscuro(): void {
-    this.modoOscuro = !this.modoOscuro;
-    document.body.classList.toggle('dark-mode', this.modoOscuro);
-    localStorage.setItem('vidasalud-modo-oscuro', this.modoOscuro ? '1' : '0');
   }
 
   toggleMenu(nombre: string): void {
