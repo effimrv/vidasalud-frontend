@@ -679,7 +679,7 @@ tr:last-child td { border-bottom: 0; }
   max-width: 94%;
   height: 240px;
   margin-top: -120px;
-  transform: translateX(calc(-50% + 350px));
+  transform: translateX(calc(-50% + 200px));
   pointer-events: none;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='240' viewBox='0 0 800 240'%3E%3Cpath d='M0,120 H38 L115,120 L128,96 L173,163 L237,24 L303,192 L346,90 L380,150 L394,120 H800' fill='none' stroke='%232a9d8f' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   z-index: 0;
@@ -692,3 +692,4 @@ tr:last-child td { border-bottom: 0; }
 .about-banner-texto { max-width: 720px; margin: 8px auto 0; color: #3d5a6a; font-size: 17px; line-height: 1.6; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .about-descripcion { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 26px 32px; margin: 18px 0 0; text-align: center; color: #3d5a6a; font-size: 17px; line-height: 1.6; }
+.hero-cta-wrapper .button-hero-login { max-width: 440px; width: 100%; }
