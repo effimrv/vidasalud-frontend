@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -88,7 +89,7 @@ export class AppointmentsComponent implements OnInit {
   readonly haceCuanto = haceCuanto;
   readonly informeMedico: (a: Appointment) => InformeMedico = informeMedico;
 
-  constructor(private api: ApiService, private destroyRef: DestroyRef) {}
+  constructor(private api: ApiService, private destroyRef: DestroyRef, private router: Router) {}
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -105,6 +106,10 @@ export class AppointmentsComponent implements OnInit {
     ).subscribe(r => {
       this.yo = r;
       this.rolResuelto = true;
+      // El auditor no tiene vista de paciente: va directo a la auditoría.
+      if (r?.roles?.includes('Auditor') && !r.roles.includes('Admin') && !r.roles.includes('Recepcionista')) {
+        this.router.navigateByUrl('/audit');
+      }
     });
 
     this.api.getCatalog().subscribe({

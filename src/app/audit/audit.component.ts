@@ -28,6 +28,11 @@ export class AuditComponent implements OnInit {
   readonly tipos = TIPOS_EVENTO;
   readonly estadoLegible = estadoLegible;
 
+  /** El tipo CREADA es el evento de la solicitud inicial: se muestra como la solicitud en revisión. */
+  etiquetaTipo(tipo: string): string {
+    return tipo === 'CREADA' ? estadoLegible('SOLICITADA') : estadoLegible(tipo);
+  }
+
   eventos: AuditEntrada[] = [];
   cargando = true;
   error = '';

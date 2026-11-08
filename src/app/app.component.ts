@@ -57,7 +57,7 @@ export class AppComponent implements OnInit {
       if (msg.eventType === EventType.LOGIN_SUCCESS) {
         // Venimos de un login recién completado: llevamos al usuario directo a su portal,
         // en vez de dejarlo en la página principal de marketing.
-        this.router.navigateByUrl('/appointments');
+        this.router.navigateByUrl(this.esAuditor ? '/audit' : '/appointments');
       }
     });
 
@@ -105,6 +105,7 @@ export class AppComponent implements OnInit {
   get etiquetaRol(): string {
     if (this.roles.includes('Admin')) return 'Admin';
     if (this.roles.includes('Recepcionista')) return 'Recepcionista';
+    if (this.roles.includes('Auditor')) return 'Auditor';
     return 'Paciente';
   }
 

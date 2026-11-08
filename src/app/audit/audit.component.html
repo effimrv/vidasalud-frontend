@@ -17,7 +17,7 @@
     Tipo de evento
     <select [(ngModel)]="filtroTipo" name="filtroTipo">
       <option value="TODOS">Todos</option>
-      <option *ngFor="let t of tipos" [value]="t">{{ estadoLegible(t) }}</option>
+      <option *ngFor="let t of tipos" [value]="t">{{ etiquetaTipo(t) }}</option>
     </select>
   </label>
   <label>
@@ -52,7 +52,7 @@
         <button type="button" class="audit-cita-btn" (click)="abrirTimeline(e.citaId)"
                 [attr.aria-label]="'Ver timeline de la atención ' + e.citaId">#{{ e.citaId }}</button>
       </td>
-      <td>{{ estadoLegible(e.tipo) }}</td>
+      <td>{{ etiquetaTipo(e.tipo) }}</td>
       <td>{{ estadoLegible(e.estado) }}</td>
       <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
     </tr>
@@ -78,7 +78,7 @@
     <tbody>
       <tr *ngFor="let e of timeline">
         <td>{{ formatearFecha(e.ocurridoEn) }}</td>
-        <td>{{ estadoLegible(e.tipo) }}</td>
+        <td>{{ etiquetaTipo(e.tipo) }}</td>
         <td>{{ estadoLegible(e.estado) }}</td>
         <td class="audit-origen">partición {{ e.particion }} · offset {{ e.offset }}</td>
       </tr>
