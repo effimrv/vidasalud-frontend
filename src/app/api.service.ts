@@ -53,6 +53,8 @@ export interface AuditEntrada {
   servicioId?: number;
   boxId?: number;
   ocurridoEn: string;
+  /** Quién provocó el cambio: Paciente, Sistema, Recepción o Administración. */
+  responsable?: string;
   /** Partición del tópico Kafka de donde llegó el evento (trazabilidad). */
   particion: number;
   /** Posición del evento dentro de esa partición. */
